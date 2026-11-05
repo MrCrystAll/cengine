@@ -39,9 +39,25 @@ ctest --preset <p> -R "core\\.result"   # by name
 
 ## Testing internals
 
-Tests link to the module like any consumer and only see public headers. If something needs
-testing but is not public, that is usually a sign it should be its own small (possibly
-header-only) module, or exposed in a `detail` header.
+Regular tests link to the module like any consumer and only see public headers. Prefer that.
+
+For implementation details that must stay private but deserve their own tests (GJK, EPA, the
+contact solver...), use an **internal** test target:
+
+```cmake
+# libs/collision/tests/CMakeLists.txt
+cengine_add_tests(collision SOURCES test_shapes.cpp)                 # public API
+cengine_add_tests(collision INTERNAL SOURCES test_gjk_internal.cpp)  # src/ details
+```
+
+```cpp
+#include "gjk.hpp"   // from libs/collision/src/
+```
+
+`INTERNAL` builds `cengine_<module>_internal_tests` against a private static copy of the
+module, compiled from the same sources and flags with `src/` on the include path. Hidden
+symbols in shared builds don't matter. CTest names are prefixed `<module>.internal.`, with
+label `internal`. Don't put an internal test and a public test in the same executable.
 
 ## Coverage
 

@@ -14,13 +14,27 @@
 │   ├── README.md           module page (pulled into the docs)
 │   ├── include/cengine/<module>/   public headers
 │   ├── src/                private implementation
-│   └── tests/              unit tests (Catch2)
+│   ├── tests/              unit tests (Catch2), optionally INTERNAL tests of src/
+│   └── benchmarks/         nanobench benchmarks (CENGINE_BUILD_BENCHMARKS)
 ├── apps/<app>/             thin executables wiring libraries together
+├── benchmarks/             shared benchmark runner (main, registry, CLI)
 ├── tests/                  cross-module tests + install/package consumer test
 ├── docs/                   guides + ADRs (Doxygen Markdown pages)
 ├── vcpkg/{ports,triplets}  overlay ports and triplets
 └── tools/                  repo maintenance scripts
 ```
+
+## Module graph
+
+Generated from the `cengine_add_library` / `cengine_add_executable` declarations every time the
+docs are built. Boxes are libraries, ellipses are applications, and dashed grey boxes are
+third-party packages. Arrows point from a target to what it depends on.
+
+@if MODULE_GRAPH
+@dotfile modules.dot
+@else
+Build the docs with Graphviz (`dot`) installed to see the module graph here.
+@endif
 
 ## Rules
 

@@ -8,9 +8,27 @@ include(GenerateExportHeader)
 #   cengine_add_library(<name> ...)     -> target cengine_<name>, alias cengine::<name>
 #   cengine_add_executable(<name> ...)  -> target cengine_<name>, binary "cengine-<name>"
 #   cengine_add_tests(<name> ...)       -> target cengine_<name>_tests, registered in CTest
+#   cengine_add_tests(<name> INTERNAL ...) -> cengine_<name>_internal_tests (can see src/)
+#   cengine_add_benchmarks(<name> ...)  -> target cengine_<name>_benchmarks (nanobench)
 #
 # See docs/guides/adding-a-module.md for the full walkthrough.
 # =============================================================================
+
+# Internal: remembers a module/app and its dependencies for the docs' module graph.
+#   kind: "module" or "app"; deps: link targets (only cengine::<x> ones are kept);
+#   packages: third-party find_package names.
+function(_cengine_record_graph_node name kind deps packages)
+  set(internal "")
+  foreach(dep IN LISTS deps)
+    if(dep MATCHES "^${PROJECT_NAME}::(.+)$")
+      list(APPEND internal ${CMAKE_MATCH_1})
+    endif()
+  endforeach()
+  set_property(GLOBAL APPEND PROPERTY CENGINE_GRAPH_NODES "${name}")
+  set_property(GLOBAL PROPERTY CENGINE_GRAPH_KIND_${name} "${kind}")
+  set_property(GLOBAL PROPERTY CENGINE_GRAPH_DEPS_${name} "${internal}")
+  set_property(GLOBAL PROPERTY CENGINE_GRAPH_PACKAGES_${name} "${packages}")
+endfunction()
 
 # Internal: settings shared by every compiled cengine target.
 function(_cengine_apply_common target)
@@ -104,6 +122,7 @@ function(cengine_add_library name)
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
     set_property(GLOBAL APPEND PROPERTY CENGINE_DOC_INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
   endif()
+  _cengine_record_graph_node(${name} module "${arg_PUBLIC_DEPS};${arg_PRIVATE_DEPS}" "${arg_PACKAGES}")
 
   if(NOT CENGINE_INSTALL)
     return()
@@ -169,6 +188,7 @@ function(cengine_add_executable name)
   target_compile_features(${target} PRIVATE cxx_std_23)
   target_link_libraries(${target} PRIVATE ${arg_DEPS})
   _cengine_apply_common(${target})
+  _cengine_record_graph_node(${name} app "${arg_DEPS}" "${arg_PACKAGES}")
 
   if(CENGINE_INSTALL AND NOT arg_NO_INSTALL)
     install(TARGETS ${target} RUNTIME COMPONENT ${target})
@@ -178,29 +198,141 @@ endfunction()
 
 # -----------------------------------------------------------------------------
 # cengine_add_tests(<module>
+#     [INTERNAL]
 #     SOURCES <test sources>...
 #     [DEPS <extra targets>...])
 # Creates cengine_<module>_tests linked to cengine::<module> + Catch2, discovered by
-# CTest with the "<module>." prefix and label "<module>".
+# CTest with the "<module>." prefix and labels "<module>;unit".
+#
+# INTERNAL: creates cengine_<module>_internal_tests instead, for testing implementation
+# details (GJK, solvers, ...). It links a private static copy of the module built from the
+# same sources, with the module's src/ on the include path and no symbol visibility
+# limits, so it works identically in static and shared builds. Labels "<module>;internal".
+# Use it only for code that is intentionally not public API.
 # -----------------------------------------------------------------------------
 function(cengine_add_tests name)
-  cmake_parse_arguments(PARSE_ARGV 1 arg "" "" "SOURCES;DEPS")
+  cmake_parse_arguments(PARSE_ARGV 1 arg "INTERNAL" "" "SOURCES;DEPS")
+  if(arg_UNPARSED_ARGUMENTS)
+    message(FATAL_ERROR "cengine_add_tests(${name}): unknown arguments ${arg_UNPARSED_ARGUMENTS}")
+  endif()
   if(NOT CENGINE_BUILD_TESTS)
     return()
   endif()
 
-  set(target ${PROJECT_NAME}_${name}_tests)
+  if(arg_INTERNAL)
+    set(target ${PROJECT_NAME}_${name}_internal_tests)
+    _cengine_internal_library(${name} under_test)
+    set(prefix "${name}.internal.")
+    set(labels "${name};internal")
+  else()
+    set(target ${PROJECT_NAME}_${name}_tests)
+    set(under_test ${PROJECT_NAME}::${name})
+    set(prefix "${name}.")
+    set(labels "${name};unit")
+  endif()
+
   add_executable(${target} ${arg_SOURCES})
   target_compile_features(${target} PRIVATE cxx_std_23)
   target_link_libraries(${target} PRIVATE
-    ${PROJECT_NAME}::${name}
+    ${under_test}
     Catch2::Catch2WithMain
     ${arg_DEPS}
     $<BUILD_INTERFACE:cengine_project_options>)
   # Tests are deliberately not run through clang-tidy (Catch2 macros are noisy).
 
   catch_discover_tests(${target}
-    TEST_PREFIX "${name}."
-    PROPERTIES LABELS "${name};unit"
+    TEST_PREFIX "${prefix}"
+    PROPERTIES LABELS "${labels}"
     DISCOVERY_MODE PRE_TEST)
+endfunction()
+
+# Internal: returns (in out_var) a target exposing <module>'s implementation to tests.
+# Compiled libraries get a private STATIC twin (cengine_<module>_internal) built from the
+# same sources with the same usage requirements, plus src/ on its include path.
+function(_cengine_internal_library name out_var)
+  set(lib ${PROJECT_NAME}_${name})
+  set(internal ${lib}_internal)
+  if(TARGET ${internal})
+    set(${out_var} ${internal} PARENT_SCOPE)
+    return()
+  endif()
+
+  get_target_property(type ${lib} TYPE)
+  get_target_property(lib_source_dir ${lib} SOURCE_DIR)
+  if(type STREQUAL "INTERFACE_LIBRARY")
+    add_library(${internal} INTERFACE)
+    target_link_libraries(${internal} INTERFACE ${lib})
+    if(EXISTS "${lib_source_dir}/src")
+      target_include_directories(${internal} INTERFACE "${lib_source_dir}/src")
+    endif()
+    set(${out_var} ${internal} PARENT_SCOPE)
+    return()
+  endif()
+
+  get_target_property(sources ${lib} SOURCES)
+  set(abs_sources "")
+  foreach(src IN LISTS sources)
+    if(src MATCHES "\\.(c|cc|cpp|cxx)$")
+      cmake_path(ABSOLUTE_PATH src BASE_DIRECTORY "${lib_source_dir}" OUTPUT_VARIABLE abs)
+      list(APPEND abs_sources "${abs}")
+    endif()
+  endforeach()
+  get_target_property(link_libs ${lib} LINK_LIBRARIES)            # public + private deps
+  get_target_property(iface_link_libs ${lib} INTERFACE_LINK_LIBRARIES)
+  string(TOUPPER "${lib}" upper)
+
+  add_library(${internal} STATIC EXCLUDE_FROM_ALL ${abs_sources})
+  target_compile_features(${internal} PUBLIC cxx_std_23)
+  target_include_directories(${internal} PUBLIC
+    "$<TARGET_PROPERTY:${lib},INTERFACE_INCLUDE_DIRECTORIES>"
+    "${lib_source_dir}/src")
+  target_compile_options(${internal} PUBLIC "$<TARGET_PROPERTY:${lib},INTERFACE_COMPILE_OPTIONS>")
+  # Static twin: export macros must expand to nothing even in shared builds.
+  target_compile_definitions(${internal} PUBLIC ${upper}_STATIC_DEFINE)
+  foreach(dep IN LISTS link_libs iface_link_libs)
+    if(dep AND NOT dep MATCHES "-NOTFOUND$")
+      target_link_libraries(${internal} PUBLIC "${dep}")
+    endif()
+  endforeach()
+  set_target_properties(${internal} PROPERTIES CXX_EXTENSIONS OFF POSITION_INDEPENDENT_CODE ON)
+  set(${out_var} ${internal} PARENT_SCOPE)
+endfunction()
+
+# -----------------------------------------------------------------------------
+# cengine_add_benchmarks(<module>
+#     SOURCES <benchmark sources>...
+#     [INTERNAL]                    # benchmark implementation details, like INTERNAL tests
+#     [DEPS <extra targets>...])
+# Creates cengine_<module>_benchmarks (nanobench, shared runner from benchmarks/) when
+# CENGINE_BUILD_BENCHMARKS is ON. With tests enabled, also registers the CTest
+# "<module>.benchmarks.smoke" (label "benchmark") that runs every benchmark once.
+# -----------------------------------------------------------------------------
+function(cengine_add_benchmarks name)
+  cmake_parse_arguments(PARSE_ARGV 1 arg "INTERNAL" "" "SOURCES;DEPS")
+  if(arg_UNPARSED_ARGUMENTS)
+    message(FATAL_ERROR "cengine_add_benchmarks(${name}): unknown arguments ${arg_UNPARSED_ARGUMENTS}")
+  endif()
+  if(NOT CENGINE_BUILD_BENCHMARKS)
+    return()
+  endif()
+
+  if(arg_INTERNAL)
+    _cengine_internal_library(${name} under_bench)
+  else()
+    set(under_bench ${PROJECT_NAME}::${name})
+  endif()
+
+  set(target ${PROJECT_NAME}_${name}_benchmarks)
+  add_executable(${target} ${arg_SOURCES})
+  target_compile_features(${target} PRIVATE cxx_std_23)
+  target_link_libraries(${target} PRIVATE
+    ${under_bench}
+    cengine_bench_runner
+    ${arg_DEPS}
+    $<BUILD_INTERFACE:cengine_project_options>)
+
+  if(CENGINE_BUILD_TESTS)
+    add_test(NAME ${name}.benchmarks.smoke COMMAND ${target} --smoke)
+    set_tests_properties(${name}.benchmarks.smoke PROPERTIES LABELS "${name};benchmark")
+  endif()
 endfunction()

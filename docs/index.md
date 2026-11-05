@@ -8,9 +8,10 @@ libraries ("modules") plus thin applications built on top of them.
 | Page | What it covers |
 |---|---|
 | @ref getting_started "Getting started" | Prerequisites, presets, build/test/install in 5 minutes |
-| @ref architecture "Architecture" | Repository layout, module rules, dependency direction |
+| @ref architecture "Architecture" | Repository layout, module graph, module rules, dependency direction |
 | @ref adding_a_module "Adding a module" | Step-by-step: new library, its tests, its docs |
-| @ref testing "Testing (TDD)" | Red/green/refactor workflow, Catch2 conventions, CTest labels |
+| @ref testing "Testing (TDD)" | Red/green/refactor workflow, Catch2 conventions, internal tests, CTest labels |
+| @ref benchmarking "Benchmarking" | nanobench benchmarks: running, comparing, writing |
 | @ref dependencies "Dependencies" | vcpkg manifest, features, overlay ports, versioning |
 | @ref install_and_package "Install and package" | `cmake --install`, CPack, consuming with `find_package` |
 | @ref adr_index "Architecture decisions" | Why things are the way they are |

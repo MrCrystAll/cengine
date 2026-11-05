@@ -3,6 +3,7 @@ include(FeatureSummary)
 
 # CENGINE_BUILD_TESTS is declared in the root CMakeLists.txt (it must exist before project()).
 add_feature_info(CENGINE_BUILD_TESTS CENGINE_BUILD_TESTS "unit and integration tests")
+add_feature_info(CENGINE_BUILD_BENCHMARKS CENGINE_BUILD_BENCHMARKS "nanobench benchmarks")
 
 option(CENGINE_BUILD_APPS "Build the applications under apps/" ON)
 option(CENGINE_BUILD_DOCS "Add the 'docs' target (Doxygen)" OFF)

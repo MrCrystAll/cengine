@@ -14,6 +14,11 @@ if(CENGINE_BUILD_TESTS)
   list(APPEND VCPKG_MANIFEST_FEATURES "tests")
 endif()
 
+option(CENGINE_BUILD_BENCHMARKS "Build nanobench benchmarks (pulls the vcpkg 'benchmarks' feature)" OFF)
+if(CENGINE_BUILD_BENCHMARKS)
+  list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
+endif()
+
 project(cengine
   VERSION 0.1.0
   DESCRIPTION "Modular C++23 monorepo"
@@ -35,6 +40,11 @@ if(CENGINE_BUILD_TESTS)
   enable_testing()
   find_package(Catch2 3 CONFIG REQUIRED)
   include(Catch)
+endif()
+
+if(CENGINE_BUILD_BENCHMARKS)
+  find_package(nanobench CONFIG REQUIRED)
+  add_subdirectory(benchmarks)  # shared runner (main, registry) used by every module's benchmarks
 endif()
 
 # -----------------------------------------------------------------------------

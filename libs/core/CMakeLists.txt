@@ -36,3 +36,4 @@ cengine_add_library(core
 target_compile_options(cengine_core PUBLIC ${CENGINE_FP_DETERMINISM_FLAGS})
 
 add_subdirectory(tests)
+add_subdirectory(benchmarks)

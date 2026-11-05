@@ -26,6 +26,7 @@ The project version is defined **only** in `project(VERSION ...)` in the root `C
 | configure / build / test (dev) | `cmake --preset msvc-debug` · `cmake --build --preset msvc-debug` · `ctest --preset msvc-debug` |
 | one module's tests | `ctest --preset msvc-debug -L <module>` |
 | fast loop (skip install test) | `ctest --preset msvc-debug -LE package` |
+| benchmarks | `cmake --preset msvc-bench`, build, then `build/msvc-bench/bin/cengine_<module>_benchmarks [--filter x] [--json f]` |
 | full CI pipeline locally | `cmake --workflow --preset ci-msvc` (Linux: `ci-gcc`, `ci-clang`) |
 | shared-lib variant | `cmake --workflow --preset ci-msvc-shared` |
 | clang-tidy | `cmake --workflow --preset ci-tidy` (Linux/macOS presets) |
@@ -47,6 +48,12 @@ never commit them.
    `cmake --workflow --preset ci-msvc` (it includes the install + `find_package` consumer test).
 4. Bug fix = a regression test that reproduces it first.
 5. Don't weaken or delete a test to make it pass. Ask instead.
+6. Test through the public API by default. For private algorithms in `src/`, use
+   `cengine_add_tests(<module> INTERNAL ...)` (see docs/guides/testing.md); never export a
+   symbol just to test it.
+7. Performance-sensitive code gets a benchmark in `libs/<module>/benchmarks/`
+   (docs/guides/benchmarking.md). Compare `--json` runs locally on one machine. CI only checks
+   that benchmarks run (`--smoke`).
 
 ## Git workflow (GitHub flow + tags, see CONTRIBUTING.md and ADR 0007)
 

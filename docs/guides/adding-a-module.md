@@ -59,4 +59,7 @@ and the package name in `PACKAGES`. The generated package config re-finds it for
 - install rules (component `cengine_geometry` / `cengine_geometry_dev`) and
   `find_package(cengine COMPONENTS geometry)` support
 - CTest registration with label `geometry` (`ctest --preset <p> -L geometry`)
+- optional INTERNAL tests of `src/` (see @ref testing) and benchmarks
+  (`benchmarks/` + `cengine_add_benchmarks`, see @ref benchmarking)
+- a node in the module graph (see @ref architecture)
 - docs: headers and `README.md` are added to the Doxygen site

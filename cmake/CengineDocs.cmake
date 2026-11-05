@@ -49,7 +49,48 @@ set(DOXYGEN_HTML_COLORSTYLE LIGHT)
 set(DOXYGEN_HTML_EXTRA_STYLESHEET
   "${doxygen_awesome_css_SOURCE_DIR}/doxygen-awesome.css"
   "${doxygen_awesome_css_SOURCE_DIR}/doxygen-awesome-sidebar-only.css")
-set(DOXYGEN_HAVE_DOT ${DOXYGEN_DOT_FOUND})
+
+# -----------------------------------------------------------------------------
+# Module dependency graph (docs/guides/architecture.md). Built from what
+# cengine_add_library / cengine_add_executable recorded, so it is always current.
+# -----------------------------------------------------------------------------
+set(_cengine_dot_dir "${PROJECT_BINARY_DIR}/docs-graph")
+set(_cengine_dot "digraph cengine_modules {\n")
+string(APPEND _cengine_dot "  rankdir=BT;\n  node [fontname=\"Helvetica\", fontsize=11];\n")
+get_property(_cengine_nodes GLOBAL PROPERTY CENGINE_GRAPH_NODES)
+set(_cengine_seen_packages "")
+foreach(_node IN LISTS _cengine_nodes)
+  get_property(_kind GLOBAL PROPERTY CENGINE_GRAPH_KIND_${_node})
+  get_property(_deps GLOBAL PROPERTY CENGINE_GRAPH_DEPS_${_node})
+  get_property(_pkgs GLOBAL PROPERTY CENGINE_GRAPH_PACKAGES_${_node})
+  if(_kind STREQUAL "app")
+    string(APPEND _cengine_dot "  \"${_node}\" [shape=ellipse, label=\"${PROJECT_NAME}-${_node}\"];\n")
+  else()
+    string(APPEND _cengine_dot "  \"${_node}\" [shape=box, label=\"${PROJECT_NAME}::${_node}\"];\n")
+  endif()
+  foreach(_dep IN LISTS _deps)
+    string(APPEND _cengine_dot "  \"${_node}\" -> \"${_dep}\";\n")
+  endforeach()
+  foreach(_pkg IN LISTS _pkgs)
+    if(NOT _pkg IN_LIST _cengine_seen_packages)
+      list(APPEND _cengine_seen_packages ${_pkg})
+      string(APPEND _cengine_dot
+        "  \"pkg:${_pkg}\" [shape=box, style=\"filled,dashed\", fillcolor=\"#eeeeee\", label=\"${_pkg}\"];\n")
+    endif()
+    string(APPEND _cengine_dot "  \"${_node}\" -> \"pkg:${_pkg}\" [style=dashed];\n")
+  endforeach()
+endforeach()
+string(APPEND _cengine_dot "}\n")
+file(WRITE "${_cengine_dot_dir}/modules.dot" "${_cengine_dot}")
+
+if(TARGET Doxygen::dot)
+  set(DOXYGEN_HAVE_DOT YES)
+  set(DOXYGEN_DOTFILE_DIRS "${_cengine_dot_dir}")
+  set(DOXYGEN_ENABLED_SECTIONS MODULE_GRAPH)
+else()
+  set(DOXYGEN_HAVE_DOT NO)
+  message(STATUS "Graphviz 'dot' not found: the docs will not include the module graph")
+endif()
 
 doxygen_add_docs(docs
   "${PROJECT_SOURCE_DIR}/docs"

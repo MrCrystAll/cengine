@@ -13,6 +13,15 @@
           "version>=": "3.5.0"
         }
       ]
+    },
+    "benchmarks": {
+      "description": "Build the nanobench benchmarks",
+      "dependencies": [
+        {
+          "name": "nanobench",
+          "version>=": "4.3.11"
+        }
+      ]
     }
   }
 }
