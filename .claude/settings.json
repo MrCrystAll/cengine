@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(cmake *)",
+      "Bash(ctest *)",
+      "Bash(cpack *)",
+      "Bash(clang-format *)",
+      "Bash(clang-tidy *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git branch*)",
+      "Bash(gh pr view*)",
+      "Bash(gh pr checks*)",
+      "Bash(gh run view*)",
+      "Bash(gh run list*)",
+      "PowerShell(cmake *)",
+      "PowerShell(ctest *)",
+      "PowerShell(cpack *)",
+      "PowerShell(clang-format *)",
+      "PowerShell(git status*)",
+      "PowerShell(git diff*)",
+      "PowerShell(git log*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I \"$CLAUDE_PROJECT_DIR/tools/hooks/clang_format_hook.py\" 2>/dev/null || true",
+            "timeout": 30,
+            "statusMessage": "clang-format"
+          }
+        ]
+      }
+    ]
+  }
+}
