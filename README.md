@@ -18,7 +18,7 @@ installable libraries (*modules*) plus thin applications that use them.
 
 ## Quick start
 
-**Prerequisites:** CMake ≥ 3.25, Ninja, a C++23 compiler (MSVC 19.40+, GCC 13+, Clang 17+),
+**Prerequisites:** CMake ≥ 3.25, Ninja, a C++23 compiler (MSVC 19.40+, GCC 13+, Clang 19+),
 and [vcpkg](https://github.com/microsoft/vcpkg) with `VCPKG_ROOT` set.
 On Windows, use a *Developer PowerShell for VS* (or an IDE) so `cl` is on `PATH`.
 

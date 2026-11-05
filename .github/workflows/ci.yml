@@ -27,13 +27,14 @@ jobs:
           - { name: windows-msvc,        os: windows-latest, preset: ci-msvc }
           - { name: windows-msvc-shared, os: windows-latest, preset: ci-msvc-shared }
           - { name: linux-gcc,           os: ubuntu-24.04,   preset: ci-gcc }
-          - { name: linux-clang,         os: ubuntu-24.04,   preset: ci-clang }
+          - { name: linux-clang,         os: ubuntu-24.04,   preset: ci-clang, llvm: '20' }
           - { name: macos-clang,         os: macos-15,       preset: ci-clang }
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
         with:
           cache-key: ${{ matrix.name }}
+          llvm-version: ${{ matrix.llvm }}   # empty except on linux-clang
 
       - name: Configure, build, test, package
         run: cmake --workflow --preset ${{ matrix.preset }}
@@ -62,6 +63,7 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           cache-key: tidy
+          llvm-version: '20'
       - name: Build with clang-tidy (warnings are errors)
         run: cmake --workflow --preset ci-tidy
 
