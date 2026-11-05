@@ -5,12 +5,37 @@ inputs:
   cache-key:
     description: Extra key segment so each job/preset gets its own vcpkg binary cache
     required: true
+  llvm-version:
+    description: >
+      Linux only: install this Clang/clang-tidy major version from the Ubuntu archive and make it
+      the `clang++` / `clang-tidy` on PATH. Needed because Ubuntu 24.04's default Clang 18 cannot
+      use libstdc++'s std::expected (it reports __cpp_concepts < 202002). Empty = keep the default.
+    required: false
+    default: ''
 
 runs:
   using: composite
   steps:
     - name: Install Ninja
       uses: seanmiddleditch/gha-setup-ninja@v6
+
+    - name: Install Clang ${{ inputs.llvm-version }}
+      if: runner.os == 'Linux' && inputs.llvm-version != ''
+      shell: bash
+      env:
+        LLVM_VERSION: ${{ inputs.llvm-version }}
+      run: |
+        set -euo pipefail
+        sudo apt-get update
+        sudo apt-get install -y "clang-${LLVM_VERSION}" "clang-tidy-${LLVM_VERSION}"
+        # Presets ask for plain `clang++`; shadow the default version without touching /usr/bin.
+        bin="${RUNNER_TEMP}/llvm-bin"
+        mkdir -p "$bin"
+        for tool in clang clang++ clang-tidy; do
+          ln -sf "/usr/bin/${tool}-${LLVM_VERSION}" "$bin/${tool}"
+        done
+        echo "$bin" >> "$GITHUB_PATH"
+        "$bin/clang++" --version
 
     - name: MSVC developer environment
       if: runner.os == 'Windows'

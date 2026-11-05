@@ -18,6 +18,8 @@
 
 ## Consequences
 
-- Compilers older than GCC 13 / Clang 17 / MSVC 19.40 are not supported.
+- Compilers older than GCC 13 / Clang 19 / MSVC 19.40 are not supported. (Amended 2026-11-05:
+  the original Clang 17 floor was wrong. Clang 18 reports `__cpp_concepts < 202002`, so
+  libstdc++ hides `std::expected`. CI installs Clang 20 on Ubuntu 24.04.)
 - Library features unevenly supported across vendors (e.g. `std::print` on older Apple libc++)
   must be checked against all three CI platforms before use.

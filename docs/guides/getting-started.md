@@ -6,7 +6,7 @@
 |---|---|---|
 | CMake | >= 3.25 | presets v6, workflow presets |
 | Ninja | any recent | generator used by every preset |
-| C++23 compiler | MSVC 19.40+ (VS 2022 17.10+), GCC 13+, Clang 17+ | |
+| C++23 compiler | MSVC 19.40+ (VS 2022 17.10+), GCC 13+, Clang 19+ | Clang 18 can't use libstdc++'s `std::expected` |
 | vcpkg | recent | `VCPKG_ROOT` must point to the clone |
 | Doxygen | >= 1.9.5 | only for docs; Graphviz optional |
 | gcovr | any | only for coverage reports |

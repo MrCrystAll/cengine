@@ -48,6 +48,21 @@ never commit them.
 4. Bug fix = a regression test that reproduces it first.
 5. Don't weaken or delete a test to make it pass. Ask instead.
 
+## Git workflow (GitHub flow + tags, see CONTRIBUTING.md and ADR 0007)
+
+- `main` is protected: never commit or push to it directly. Start every task on a branch from an
+  up-to-date `main`, named `<type>/<short-description>`, where the type is feature, bugfix, hotfix, perf,
+  refactor, test, docs, ci or chore. Use lowercase with `-`, e.g. `feature/sweep-and-prune`. CI rejects
+  other names.
+- PRs are squash-merged, so **the PR title is the commit on `main`**: write it in the imperative
+  ("Add sweep-and-prune broadphase"). Fill in `.github/pull_request_template.md`.
+- Commit, push and open PRs only when the user asks. Never force-push a branch someone else uses,
+  and never create, move or delete `v*` tags unless the user explicitly asks for a release.
+- Release = a `chore/release-X.Y.Z` PR bumping `project(VERSION)`, then an annotated tag `vX.Y.Z`
+  on the merge commit. `release/X.Y` branches exist only to patch old versions and take only
+  `hotfix/*` and `bugfix/*` PRs.
+- If you rename a CI job, update the required check list in `.github/rulesets/main.json`.
+
 ## Architecture rules
 
 - **Logic lives in `libs/`.** `apps/` only parse input, wire modules, and do I/O.
@@ -120,4 +135,5 @@ never commit them.
 | `cmake/CengineDocs.cmake` | Doxygen + doxygen-awesome-css |
 | `cmake/CenginePackaging.cmake` | CPack |
 | `tests/CMakeLists.txt`, `tests/package/` | install + `find_package` consumer test |
-| `.github/workflows/` | `ci.yml`, `docs.yml` (Pages), `release.yml` (tags `vX.Y.Z`) |
+| `.github/workflows/` | `ci.yml`, `pr-checks.yml` (branch names), `docs.yml` (Pages), `release.yml` (tags `vX.Y.Z`) |
+| `.github/rulesets/` | branch/tag protection as code, plus the `gh` commands that apply them |

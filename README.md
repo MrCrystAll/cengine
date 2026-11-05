@@ -18,7 +18,7 @@ installable libraries (*modules*) plus thin applications that use them.
 
 ## Quick start
 
-**Prerequisites:** CMake ≥ 3.25, Ninja, a C++23 compiler (MSVC 19.40+, GCC 13+, Clang 17+),
+**Prerequisites:** CMake ≥ 3.25, Ninja, a C++23 compiler (MSVC 19.40+, GCC 13+, Clang 19+),
 and [vcpkg](https://github.com/microsoft/vcpkg) with `VCPKG_ROOT` set.
 On Windows, use a *Developer PowerShell for VS* (or an IDE) so `cl` is on `PATH`.
 
@@ -80,7 +80,7 @@ complete consumer that CI checks.
 
 ```cmake
 include(FetchContent)
-FetchContent_Declare(cengine GIT_REPOSITORY https://github.com/OWNER/cengine.git GIT_TAG v0.1.0)
+FetchContent_Declare(cengine GIT_REPOSITORY https://github.com/MrCrystAll/cengine.git GIT_TAG v0.1.0)
 FetchContent_MakeAvailable(cengine)
 target_link_libraries(your_target PRIVATE cengine::core)
 ```
@@ -157,7 +157,7 @@ python tools/rename_project.py <newname>      # e.g. "orbit" -> orbit::core, ORB
 
 This rewrites identifiers (`cengine`, `Cengine`, `CENGINE`) in tracked text files and renames paths such as
 `include/cengine/` and `cmake/Cengine*.cmake`. Words like "skeleton" aren't touched. Delete your `build/`
-folder afterwards. Also replace `OWNER` in the URLs (`CMakeLists.txt`, this README) with your GitHub account.
+folder afterwards, and update the repository URLs (`CMakeLists.txt`, this README).
 
 ## License
 

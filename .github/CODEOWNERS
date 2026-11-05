@@ -1,0 +1,8 @@
+# Who is requested for review. Last matching pattern wins.
+*                   @MrCrystAll
+
+# Build system, CI and repository settings
+/cmake/             @MrCrystAll
+/.github/           @MrCrystAll
+/CMakePresets.json  @MrCrystAll
+/vcpkg*.json        @MrCrystAll
