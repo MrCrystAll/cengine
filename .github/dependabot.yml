@@ -1,0 +1,14 @@
+version: 2
+updates:
+  # Keeps the action versions in .github/workflows and .github/actions current.
+  - package-ecosystem: github-actions
+    directories:
+      - "/"
+      - "/.github/actions/*"
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"

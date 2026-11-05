@@ -5,17 +5,21 @@ date when a convention changes. Record *why* in an ADR under `docs/adr/`.
 
 ## Project in one paragraph
 
-`cengine` (a **placeholder name**: the theme isn't decided yet, and `tools/rename_project.py` renames it) is a
-**C++23 monorepo of many small modules ("microprojects")**. Each library lives in `libs/<module>/`, and
+`cengine` is a **physics engine**, built as a **C++23 monorepo of many small modules
+("microprojects")**. Each library lives in `libs/<module>/`, and
 apps in `apps/` are thin front-ends. The project is **test-driven** (Catch2 v3 + CTest). It uses **vcpkg
 manifest mode** for third-party code, **Doxygen** for docs, and **GitHub Actions** CI on Windows, Linux and macOS.
 License: MIT.
 
 ## Commands
 
-On Windows, run from a VS Developer shell. From Claude's shell, prefix with:
-`cmd /c "call D:\Utils\VS2026\VC\Auxiliary\Build\vcvars64.bat >nul && <command>"`.
-`VCPKG_ROOT` must be set (on this machine: `D:\Projects\vcpkg`).
+`VCPKG_ROOT` must point to a vcpkg clone. On Windows, commands need the MSVC environment (a VS
+Developer shell, or `vcvars64.bat` called first). Machine-specific details (VS install path,
+vcpkg location, how to call vcvars from Claude's shell) live in the untracked `CLAUDE.local.md`;
+create it from the template in `docs/guides/getting-started.md` if it's missing.
+
+The project version is defined **only** in `project(VERSION ...)` in the root `CMakeLists.txt`
+(the release workflow checks the git tag against it). Don't add a version to `vcpkg.json`.
 
 | Goal | Command |
 |---|---|
@@ -27,7 +31,7 @@ On Windows, run from a VS Developer shell. From Claude's shell, prefix with:
 | clang-tidy | `cmake --workflow --preset ci-tidy` (Linux/macOS presets) |
 | coverage | `cmake --workflow --preset ci-coverage` then `--target coverage` (GCC, Linux) |
 | docs | `cmake --workflow --preset docs` → `build/docs/docs/html/index.html` |
-| format | `clang-format -i <files>` (CI fails on unformatted code) |
+| format | `clang-format -i <files>` with **clang-format 20** (CI pins 20.1.0 and fails on unformatted code) |
 | install | `cmake --install build/<preset> --prefix <dir>` |
 
 Build trees are `build/<preset>/` and default installs go to `install/<preset>/`. Never edit them, and
@@ -101,7 +105,7 @@ never commit them.
 
 - Adding a dependency, a new module boundary, or a public API in `core`.
 - Anything that changes the public CMake interface (target names, options, package layout).
-- The project's real name/theme (still undecided). Don't rename on your own.
+- Renaming the project or its modules. Don't rename on your own.
 
 ## Map of the build system
 

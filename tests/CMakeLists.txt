@@ -26,8 +26,8 @@ set(_opts
   "-DCMAKE_PREFIX_PATH=${_prefix}"
   "-DCMAKE_BUILD_TYPE=$<CONFIG>"
   "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
-  "-DSKEL_EXPECTED_VERSION=${PROJECT_VERSION}"
-  "-DSKEL_RUNTIME_DIR=${_prefix}/${CMAKE_INSTALL_BINDIR}")
+  "-DCENGINE_EXPECTED_VERSION=${PROJECT_VERSION}"
+  "-DCENGINE_RUNTIME_DIR=${_prefix}/${CMAKE_INSTALL_BINDIR}")
 if(CMAKE_TOOLCHAIN_FILE)
   # Reuse the already-installed vcpkg packages instead of resolving a new manifest.
   list(APPEND _opts

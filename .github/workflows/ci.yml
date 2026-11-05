@@ -69,8 +69,13 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      # Pinned: clang-format output differs between major versions. Keep in sync with
+      # the version used locally (see CLAUDE.md).
+      - name: Install clang-format
+        run: pipx install clang-format==20.1.0
       - name: Check formatting
         run: |
+          clang-format --version
           git ls-files '*.hpp' '*.cpp' '*.h' \
             | xargs clang-format --dry-run --Werror
 

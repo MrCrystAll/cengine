@@ -25,5 +25,6 @@ compile_commands.json
 # Python
 __pycache__/
 
-# Claude Code local settings
+# Claude Code local settings / machine-specific instructions
 .claude/settings.local.json
+CLAUDE.local.md

@@ -32,8 +32,11 @@ def patterns(old: str, new: str) -> list[tuple[re.Pattern[str], str]]:
         (old.capitalize(), new.capitalize()),
         (old.upper(), new.upper()),
     ]
-    # Not preceded by a letter, not followed by a lowercase letter (blocks "skeleton").
-    return [(re.compile(rf"(?<![A-Za-z]){re.escape(o)}(?![a-z])"), n) for o, n in variants]
+    # Not preceded by a letter (except the "-D" of a CMake cache definition, e.g. -DSKEL_X=1),
+    # not followed by a lowercase letter (blocks "skeleton").
+    return [
+        (re.compile(rf"(?:(?<![A-Za-z])|(?<=-D)){re.escape(o)}(?![a-z])"), n) for o, n in variants
+    ]
 
 
 def iter_files(root: Path):

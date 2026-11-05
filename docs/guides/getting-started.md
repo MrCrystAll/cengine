@@ -49,3 +49,18 @@ cmake --workflow --preset ci-msvc   # ci-gcc / ci-clang / ci-tidy / ci-coverage 
 | `docs` | Doxygen site in `build/docs/docs/html` |
 
 Machine-specific tweaks go in an untracked `CMakeUserPresets.json` that inherits from these.
+
+## Claude Code on your machine
+
+`CLAUDE.md` is shared and holds no machine paths. Put yours in an untracked `CLAUDE.local.md` at
+the repository root (Claude Code reads both):
+
+```markdown
+# CLAUDE.local.md (this machine only, not committed)
+
+- Visual Studio: `<VS install dir>`
+- vcpkg: `<vcpkg clone>` (`VCPKG_ROOT` is set to it)
+- LLVM (clang-tidy, clang-format 20): `<llvm>/bin` (on `PATH`)
+- From Claude's shell, wrap build commands so the MSVC environment is loaded:
+  `cmd /c "call <VS install dir>\VC\Auxiliary\Build\vcvars64.bat >nul && <command>"`
+```

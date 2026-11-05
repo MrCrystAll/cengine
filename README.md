@@ -1,9 +1,6 @@
 # cengine
 
-> **Placeholder name.** The project theme isn't chosen yet. Once you have a name, run
-> `python tools/rename_project.py <newname>` to rename everything in one go (see [Renaming](#renaming)).
-
-cengine is a modular **C++23** monorepo. It is a set of small, independently tested and
+cengine is a **physics engine** written in modular **C++23**. It is a set of small, independently tested and
 installable libraries (*modules*) plus thin applications that use them.
 
 - **Separation of concerns**: all logic lives in libraries under `libs/`. Apps under `apps/` only wire them together.
