@@ -81,6 +81,12 @@
       "cacheVariables": { "BUILD_SHARED_LIBS": "ON" }
     },
     { "name": "ci-gcc", "displayName": "CI: GCC Release", "inherits": ["gcc", "release", "strict"] },
+    {
+      "name": "ci-gcc-float",
+      "displayName": "CI: GCC Release, float precision",
+      "inherits": ["gcc", "release", "strict"],
+      "cacheVariables": { "CENGINE_DOUBLE_PRECISION": "OFF" }
+    },
     { "name": "ci-clang", "displayName": "CI: Clang Release", "inherits": ["clang", "release", "strict"] },
     {
       "name": "ci-tidy",
@@ -119,6 +125,7 @@
     { "name": "ci-msvc", "configurePreset": "ci-msvc" },
     { "name": "ci-msvc-shared", "configurePreset": "ci-msvc-shared" },
     { "name": "ci-gcc", "configurePreset": "ci-gcc" },
+    { "name": "ci-gcc-float", "configurePreset": "ci-gcc-float" },
     { "name": "ci-clang", "configurePreset": "ci-clang" },
     { "name": "ci-tidy", "configurePreset": "ci-tidy" },
     { "name": "ci-coverage", "configurePreset": "ci-coverage" },
@@ -142,6 +149,7 @@
     { "name": "ci-msvc", "inherits": "test-base", "configurePreset": "ci-msvc" },
     { "name": "ci-msvc-shared", "inherits": "test-base", "configurePreset": "ci-msvc-shared" },
     { "name": "ci-gcc", "inherits": "test-base", "configurePreset": "ci-gcc" },
+    { "name": "ci-gcc-float", "inherits": "test-base", "configurePreset": "ci-gcc-float" },
     { "name": "ci-clang", "inherits": "test-base", "configurePreset": "ci-clang" },
     { "name": "ci-tidy", "inherits": "test-base", "configurePreset": "ci-tidy" },
     { "name": "ci-coverage", "inherits": "test-base", "configurePreset": "ci-coverage" }
@@ -150,6 +158,7 @@
     { "name": "ci-msvc", "configurePreset": "ci-msvc" },
     { "name": "ci-msvc-shared", "configurePreset": "ci-msvc-shared" },
     { "name": "ci-gcc", "configurePreset": "ci-gcc" },
+    { "name": "ci-gcc-float", "configurePreset": "ci-gcc-float" },
     { "name": "ci-clang", "configurePreset": "ci-clang" },
     { "name": "msvc-release", "configurePreset": "msvc-release" },
     { "name": "gcc-release", "configurePreset": "gcc-release" },
@@ -181,6 +190,15 @@
         { "type": "build", "name": "ci-gcc" },
         { "type": "test", "name": "ci-gcc" },
         { "type": "package", "name": "ci-gcc" }
+      ]
+    },
+    {
+      "name": "ci-gcc-float",
+      "steps": [
+        { "type": "configure", "name": "ci-gcc-float" },
+        { "type": "build", "name": "ci-gcc-float" },
+        { "type": "test", "name": "ci-gcc-float" },
+        { "type": "package", "name": "ci-gcc-float" }
       ]
     },
     {

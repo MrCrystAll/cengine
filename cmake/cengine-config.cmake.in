@@ -6,6 +6,9 @@
 
 @PACKAGE_INIT@
 
+# Build configuration of this package (ADR 0008).
+set(@PROJECT_NAME@_DOUBLE_PRECISION @CENGINE_DOUBLE_PRECISION@)
+
 set(_@PROJECT_NAME@_known_modules "@CENGINE_ALL_MODULES@")
 
 if(@PROJECT_NAME@_FIND_COMPONENTS)

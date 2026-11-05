@@ -33,6 +33,7 @@
           { "context": "windows-msvc" },
           { "context": "windows-msvc-shared" },
           { "context": "linux-gcc" },
+          { "context": "linux-gcc-float" },
           { "context": "linux-clang" },
           { "context": "macos-clang" },
           { "context": "clang-tidy" },

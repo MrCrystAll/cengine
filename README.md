@@ -120,6 +120,7 @@ Details: [docs/guides/install-and-package.md](docs/guides/install-and-package.md
 | `CENGINE_ENABLE_CLANG_TIDY` | OFF | clang-tidy while compiling libs/apps |
 | `CENGINE_ENABLE_COVERAGE` | OFF | `--coverage` + `coverage` target (gcovr) |
 | `BUILD_SHARED_LIBS` | OFF | shared libraries (exports handled by generated headers) |
+| `CENGINE_DOUBLE_PRECISION` | ON | `cengine::real` is `double` (ON) or `float` (OFF). Baked into the installed `config.hpp` |
 
 Put personal overrides in an untracked `CMakeUserPresets.json`.
 

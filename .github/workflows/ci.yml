@@ -27,6 +27,7 @@ jobs:
           - { name: windows-msvc,        os: windows-latest, preset: ci-msvc }
           - { name: windows-msvc-shared, os: windows-latest, preset: ci-msvc-shared }
           - { name: linux-gcc,           os: ubuntu-24.04,   preset: ci-gcc }
+          - { name: linux-gcc-float,     os: ubuntu-24.04,   preset: ci-gcc-float }
           - { name: linux-clang,         os: ubuntu-24.04,   preset: ci-clang, llvm: '20' }
           - { name: macos-clang,         os: macos-15,       preset: ci-clang }
     steps:

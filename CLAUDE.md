@@ -80,6 +80,25 @@ never commit them.
 - New module: follow `docs/guides/adding-a-module.md` exactly (CMake, tests, README, add it to
   `libs/CMakeLists.txt`, and add rows to the module tables in `README.md` and `docs/index.md`).
 
+## Floating point and invariants (ADRs 0008–0010)
+
+- **Scalars:** use `cengine::real` from `<cengine/core/config.hpp>` (double by default, float with
+  `CENGINE_DOUBLE_PRECISION=OFF`), never raw `float`/`double` in engine code. The exception is math
+  templates (`basic_vec3<T>`) with `real` aliases. Literals: `static_cast<real>(0.1)`.
+- **Determinism:** results must be bit-identical on every platform. On the simulation path:
+  - only `+ - * /`, `sqrt`, `abs`, `min`/`max`, `floor`/`ceil`/`trunc`/`round`, explicit `fma`;
+  - **no** `std::sin/cos/tan/exp/log/pow/atan2...` (they differ between C runtimes), no
+    `long double`, no `-ffast-math`/`/fp:fast`;
+  - no result-affecting iteration over `std::unordered_*`, fixed-order parallel reductions.
+  The FP flags come PUBLIC from `cengine::core` (see `CENGINE_FP_DETERMINISM_FLAGS`). Don't add
+  per-target FP flags.
+- **Invariants:** `CENGINE_ASSERT(cond, "why")` from `<cengine/core/assert.hpp>`; Debug only,
+  compiled out in Release. Use `CENGINE_ASSERT_SLOW` for expensive checks. No side effects in
+  conditions. Test asserts with the throwing handler in `libs/core/tests/assert_test_support.hpp`.
+  Bugs → assert; recoverable failures → `result<T>`.
+- Both precisions must pass CI (`ci-gcc-float` job). Write math tests as `TEMPLATE_TEST_CASE`
+  over `float, double` where the code is templated.
+
 ## C++ conventions
 
 - **C++23**, no compiler extensions, portable across MSVC / GCC / Clang / Apple Clang. Check that a

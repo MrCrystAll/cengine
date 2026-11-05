@@ -8,6 +8,28 @@ include_guard(GLOBAL)
 # -----------------------------------------------------------------------------
 add_library(cengine_project_options INTERFACE)
 
+# -----------------------------------------------------------------------------
+# Deterministic floating point (ADR 0009). Applied PUBLIC on cengine::core, so it reaches every
+# module and every consumer of the installed package.
+# -----------------------------------------------------------------------------
+if(MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  # clang-cl defaults to the precise FP model but contracts to FMA; /fp:precise would also
+  # trigger -Woverriding-option against the contract flag.
+  set(CENGINE_FP_DETERMINISM_FLAGS /clang:-ffp-contract=off)
+elseif(MSVC)
+  set(CENGINE_FP_DETERMINISM_FLAGS /fp:precise)
+else()
+  set(CENGINE_FP_DETERMINISM_FLAGS -ffp-contract=off)
+endif()
+
+string(TOUPPER "${CMAKE_BUILD_TYPE}" _cengine_build_type_upper)
+set(_cengine_all_cxx_flags "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${_cengine_build_type_upper}}")
+if(_cengine_all_cxx_flags MATCHES "(-ffast-math|-Ofast|/fp:fast|-funsafe-math-optimizations)")
+  message(FATAL_ERROR
+    "cengine requires deterministic floating point (ADR 0009): remove '${CMAKE_MATCH_1}' "
+    "from CMAKE_CXX_FLAGS.")
+endif()
+
 set(_cengine_gnu_style_warnings
   -Wshadow
   -Wnon-virtual-dtor
