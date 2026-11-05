@@ -1,0 +1,42 @@
+name: PR checks
+
+# Enforces the branching model from CONTRIBUTING.md. Required by the main ruleset.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  branch-name:
+    name: branch-name
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check branch name and target
+        env:
+          HEAD_REF: ${{ github.head_ref }}   # via env: never interpolate untrusted refs into scripts
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          echo "PR: ${HEAD_REF} -> ${BASE_REF}"
+
+          # Bots (Dependabot) use their own naming.
+          if [[ "$HEAD_REF" =~ ^dependabot/ ]]; then
+            echo "Bot branch: OK"; exit 0
+          fi
+
+          slug='[a-z0-9]+([._-][a-z0-9]+)*'
+          if [[ ! "$HEAD_REF" =~ ^(feature|bugfix|hotfix|perf|refactor|test|docs|ci|chore)/${slug}$ ]]; then
+            echo "::error::Branch '${HEAD_REF}' does not follow <type>/<short-description>."
+            echo "Types: feature bugfix hotfix perf refactor test docs ci chore. Description: lowercase, digits, '-', '.', '_'."
+            echo "Examples: feature/broadphase-sap, bugfix/nan-in-solver, feature/ceng-42-sweep-and-prune"
+            exit 1
+          fi
+
+          # Maintenance lines only take fixes.
+          if [[ "$BASE_REF" =~ ^release/ && ! "$HEAD_REF" =~ ^(hotfix|bugfix)/ ]]; then
+            echo "::error::Only hotfix/* or bugfix/* branches may target ${BASE_REF}."
+            exit 1
+          fi
+          echo "OK"

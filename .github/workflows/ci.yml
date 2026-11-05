@@ -2,14 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'release/**']   # main = integration, release/X.Y = maintenance lines
   pull_request:
   workflow_dispatch:
   workflow_call:  # reused by release.yml
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Superseded PR pushes are cancelled; runs on main/release branches always finish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -108,7 +109,7 @@ jobs:
             build/ci-coverage/coverage/
 
   docs:
-    name: docs (warnings are errors)
+    name: docs   # Doxygen warnings are errors (docs preset)
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4

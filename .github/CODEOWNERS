@@ -1,0 +1,9 @@
+# Who is requested for review. Last matching pattern wins.
+# Replace @OWNER with your GitHub username (or a team, e.g. @org/physics) before relying on it.
+*                   @OWNER
+
+# Build system, CI and repository settings
+/cmake/             @OWNER
+/.github/           @OWNER
+/CMakePresets.json  @OWNER
+/vcpkg*.json        @OWNER

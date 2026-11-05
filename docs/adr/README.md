@@ -12,3 +12,4 @@ new ADR that supersedes the old one and update the old one's status.
 | @ref adr_0004 "0004" | `std::expected` for recoverable errors | Accepted |
 | @ref adr_0005 "0005" | Doxygen + doxygen-awesome-css for documentation | Accepted |
 | @ref adr_0006 "0006" | C++23, snake_case, Windows/Linux/macOS | Accepted |
+| @ref adr_0007 "0007" | GitHub flow + tags for branches and releases | Accepted |
