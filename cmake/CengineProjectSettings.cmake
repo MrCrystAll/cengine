@@ -22,6 +22,19 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 
+# Compiler cache: sccache (preferred: also caches MSVC) or ccache, if installed.
+if(CENGINE_USE_COMPILER_CACHE AND NOT CMAKE_CXX_COMPILER_LAUNCHER)
+  find_program(CENGINE_COMPILER_CACHE NAMES sccache ccache)
+  if(CENGINE_COMPILER_CACHE)
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CENGINE_COMPILER_CACHE}")
+    message(STATUS "Compiler cache: ${CENGINE_COMPILER_CACHE}")
+    if(MSVC)
+      # /Zi writes a shared PDB, which compiler caches cannot handle; embed debug info (/Z7).
+      set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
+    endif()
+  endif()
+endif()
+
 # Relocatable installs on Linux/macOS: executables look for libs relative to themselves.
 if(APPLE)
   set(_cengine_rpath_base "@loader_path")

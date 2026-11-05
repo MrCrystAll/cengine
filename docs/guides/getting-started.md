@@ -46,6 +46,12 @@ cmake --workflow --preset ci-msvc   # ci-gcc / ci-clang / ci-tidy / ci-coverage 
 | `ci-msvc-shared` | same, with `BUILD_SHARED_LIBS=ON` (catches missing exports) |
 | `ci-tidy` | clang-tidy on every library/app source |
 | `ci-coverage` | GCC + `--coverage`; then `cmake --build --preset ci-coverage --target coverage` |
+| `ci-sanitize` | Clang Debug with AddressSanitizer + UndefinedBehaviorSanitizer (Linux/macOS) |
+| `msvc-bench` / `gcc-bench` / `clang-bench` | Release + nanobench benchmarks |
+
+**Compiler cache:** if `sccache` (preferred, it also caches MSVC) or `ccache` is on `PATH`, CMake
+uses it automatically (`CENGINE_USE_COMPILER_CACHE`, ON by default). On Windows:
+`winget install Mozilla.sccache`. CI uses sccache with the GitHub Actions cache.
 | `docs` | Doxygen site in `build/docs/docs/html` |
 
 Machine-specific tweaks go in an untracked `CMakeUserPresets.json` that inherits from these.

@@ -59,6 +59,18 @@ module, compiled from the same sources and flags with `src/` on the include path
 symbols in shared builds don't matter. CTest names are prefixed `<module>.internal.`, with
 label `internal`. Don't put an internal test and a public test in the same executable.
 
+## Sanitizers
+
+```bash
+cmake --workflow --preset ci-sanitize    # Linux/macOS, Clang: ASan + UBSan, all tests
+```
+
+AddressSanitizer catches out-of-bounds accesses, use-after-free and leaks. UndefinedBehaviorSanitizer
+catches signed overflow, misaligned access, invalid shifts and more. Any finding fails the test
+(`halt_on_error` / `abort_on_error`), with a stack trace. Only cengine targets are instrumented
+(`CENGINE_SANITIZERS`), and the install/package test is disabled in this configuration. A CI job
+runs it on every PR.
+
 ## Coverage
 
 ```bash

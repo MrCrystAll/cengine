@@ -19,6 +19,15 @@ runs:
     - name: Install Ninja
       uses: seanmiddleditch/gha-setup-ninja@v6
 
+    # Compiler cache backed by the GitHub Actions cache. CMake picks sccache up automatically
+    # (CENGINE_USE_COMPILER_CACHE); vcpkg's own dependency builds are cached separately.
+    - name: Install sccache
+      uses: mozilla-actions/sccache-action@v0.0.11
+
+    - name: Enable sccache GitHub Actions backend
+      shell: bash
+      run: echo "SCCACHE_GHA_ENABLED=true" >> "$GITHUB_ENV"
+
     - name: Install Clang ${{ inputs.llvm-version }}
       if: runner.os == 'Linux' && inputs.llvm-version != ''
       shell: bash
@@ -27,7 +36,9 @@ runs:
       run: |
         set -euo pipefail
         sudo apt-get update
-        sudo apt-get install -y "clang-${LLVM_VERSION}" "clang-tidy-${LLVM_VERSION}"
+        # libclang-rt: sanitizer runtimes (ASan/UBSan) for this Clang version.
+        sudo apt-get install -y "clang-${LLVM_VERSION}" "clang-tidy-${LLVM_VERSION}" \
+          "libclang-rt-${LLVM_VERSION}-dev"
         # Presets ask for plain `clang++`; shadow the default version without touching /usr/bin.
         bin="${RUNNER_TEMP}/llvm-bin"
         mkdir -p "$bin"

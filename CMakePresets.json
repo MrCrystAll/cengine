@@ -281,6 +281,19 @@
       }
     },
     {
+      "name": "ci-sanitize",
+      "displayName": "CI: Clang ASan + UBSan",
+      "inherits": [
+        "clang",
+        "debug",
+        "strict"
+      ],
+      "cacheVariables": {
+        "CENGINE_SANITIZERS": "address;undefined",
+        "CENGINE_BUILD_PACKAGE_TEST": "OFF"
+      }
+    },
+    {
       "name": "docs",
       "displayName": "Documentation only (no compiler deps, no vcpkg)",
       "generator": "Ninja",
@@ -365,6 +378,10 @@
     {
       "name": "ci-coverage",
       "configurePreset": "ci-coverage"
+    },
+    {
+      "name": "ci-sanitize",
+      "configurePreset": "ci-sanitize"
     },
     {
       "name": "docs",
@@ -475,6 +492,15 @@
       "name": "ci-coverage",
       "inherits": "test-base",
       "configurePreset": "ci-coverage"
+    },
+    {
+      "name": "ci-sanitize",
+      "inherits": "test-base",
+      "configurePreset": "ci-sanitize",
+      "environment": {
+        "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=1:strict_string_checks=1",
+        "UBSAN_OPTIONS": "print_stacktrace=1:halt_on_error=1"
+      }
     }
   ],
   "packagePresets": [
@@ -644,6 +670,23 @@
         {
           "type": "test",
           "name": "ci-coverage"
+        }
+      ]
+    },
+    {
+      "name": "ci-sanitize",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-sanitize"
+        },
+        {
+          "type": "build",
+          "name": "ci-sanitize"
+        },
+        {
+          "type": "test",
+          "name": "ci-sanitize"
         }
       ]
     },

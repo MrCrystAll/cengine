@@ -88,6 +88,26 @@ else()
 endif()
 
 # -----------------------------------------------------------------------------
+# Sanitizers (ASan/UBSan) on cengine targets only; dependencies stay uninstrumented.
+# -----------------------------------------------------------------------------
+if(CENGINE_SANITIZERS)
+  if(MSVC)
+    message(FATAL_ERROR "CENGINE_SANITIZERS is only supported with GCC/Clang (use a Linux/macOS preset)")
+  endif()
+  set(_cengine_san_names "")
+  foreach(_san IN LISTS CENGINE_SANITIZERS)
+    if(NOT _san MATCHES "^(address|undefined)$")
+      message(FATAL_ERROR "CENGINE_SANITIZERS: unsupported sanitizer '${_san}' (use address, undefined)")
+    endif()
+    list(APPEND _cengine_san_names ${_san})
+  endforeach()
+  list(JOIN _cengine_san_names "," _cengine_san_arg)
+  target_compile_options(cengine_project_options INTERFACE
+    -fsanitize=${_cengine_san_arg} -fno-omit-frame-pointer -fno-sanitize-recover=all)
+  target_link_options(cengine_project_options INTERFACE -fsanitize=${_cengine_san_arg})
+endif()
+
+# -----------------------------------------------------------------------------
 # Coverage
 # -----------------------------------------------------------------------------
 if(CENGINE_ENABLE_COVERAGE)

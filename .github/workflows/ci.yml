@@ -68,6 +68,24 @@ jobs:
       - name: Build with clang-tidy (warnings are errors)
         run: cmake --workflow --preset ci-tidy
 
+  sanitizers:
+    name: sanitizers
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: sanitize
+          llvm-version: '20'
+      - name: Build and test under ASan + UBSan
+        run: cmake --workflow --preset ci-sanitize
+      - name: Upload test logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-logs-sanitizers
+          path: build/ci-sanitize/Testing/Temporary/
+
   format:
     name: clang-format
     runs-on: ubuntu-24.04
