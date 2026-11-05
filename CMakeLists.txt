@@ -17,7 +17,7 @@ endif()
 project(cengine
   VERSION 0.1.0
   DESCRIPTION "Modular C++23 monorepo"
-  HOMEPAGE_URL "https://github.com/OWNER/cengine"
+  HOMEPAGE_URL "https://github.com/MrCrystAll/cengine"
   LANGUAGES CXX)
 
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)

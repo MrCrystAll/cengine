@@ -11,10 +11,10 @@ public repositories (private ones need GitHub Pro or Team).
 
 ## Apply
 
-Replace `OWNER/REPO`, then run from the repository root (Git Bash on Windows):
+Run from the repository root (Git Bash on Windows):
 
 ```bash
-REPO=OWNER/REPO
+REPO=MrCrystAll/cengine
 
 # Merge settings: squash only, PR title/body as the commit, delete merged branches
 gh repo edit "$REPO" \
