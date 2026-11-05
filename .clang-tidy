@@ -23,7 +23,8 @@ Checks: >
   -readability-magic-numbers,
   -readability-redundant-access-specifiers
 
-HeaderFilterRegex: '.*/(libs|apps)/.*'
+# Matches both / and \ separators, so headers are also checked on Windows.
+HeaderFilterRegex: '.*[/\\](libs|apps)[/\\].*'
 FormatStyle: file
 
 CheckOptions:

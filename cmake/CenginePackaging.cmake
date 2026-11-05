@@ -20,8 +20,14 @@ if(BUILD_SHARED_LIBS)
 else()
   set(_cengine_link "static")
 endif()
-string(TOLOWER "${PROJECT_NAME}-${PROJECT_VERSION}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}-${_cengine_link}"
-       CPACK_PACKAGE_FILE_NAME)
+if(CENGINE_DOUBLE_PRECISION)
+  set(_cengine_precision "f64")
+else()
+  set(_cengine_precision "f32")
+endif()
+string(TOLOWER
+  "${PROJECT_NAME}-${PROJECT_VERSION}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}-${_cengine_link}-${_cengine_precision}"
+  CPACK_PACKAGE_FILE_NAME)
 
 if(WIN32)
   set(CPACK_GENERATOR "ZIP")

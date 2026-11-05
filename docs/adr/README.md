@@ -13,3 +13,6 @@ new ADR that supersedes the old one and update the old one's status.
 | @ref adr_0005 "0005" | Doxygen + doxygen-awesome-css for documentation | Accepted |
 | @ref adr_0006 "0006" | C++23, snake_case, Windows/Linux/macOS | Accepted |
 | @ref adr_0007 "0007" | GitHub flow + tags for branches and releases | Accepted |
+| @ref adr_0008 "0008" | Configurable scalar precision, double by default | Accepted |
+| @ref adr_0009 "0009" | Bit-identical floating-point results across platforms | Accepted |
+| @ref adr_0010 "0010" | `CENGINE_ASSERT` for invariants | Accepted |
