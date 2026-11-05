@@ -29,7 +29,7 @@ jobs:
           - { name: linux-clang,         os: ubuntu-24.04,   preset: ci-clang }
           - { name: macos-clang,         os: macos-15,       preset: ci-clang }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
         with:
           cache-key: ${{ matrix.name }}
@@ -38,7 +38,7 @@ jobs:
         run: cmake --workflow --preset ${{ matrix.preset }}
 
       - name: Upload package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: package-${{ matrix.name }}
           path: |
@@ -48,7 +48,7 @@ jobs:
 
       - name: Upload test logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-logs-${{ matrix.name }}
           path: build/${{ matrix.preset }}/Testing/Temporary/
@@ -57,7 +57,7 @@ jobs:
     name: clang-tidy
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
         with:
           cache-key: tidy
@@ -68,7 +68,7 @@ jobs:
     name: clang-format
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Pinned: clang-format output differs between major versions. Keep in sync with
       # the version used locally (see CLAUDE.md).
       - name: Install clang-format
@@ -83,7 +83,7 @@ jobs:
     name: coverage
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
         with:
           cache-key: coverage
@@ -100,7 +100,7 @@ jobs:
             cat coverage.txt | tail -n 30
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: |
@@ -111,7 +111,7 @@ jobs:
     name: docs (warnings are errors)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install Doxygen, Graphviz, Ninja
         run: sudo apt-get update && sudo apt-get install -y doxygen graphviz ninja-build
       - name: Build docs
