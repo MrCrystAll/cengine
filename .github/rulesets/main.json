@@ -37,6 +37,7 @@
           { "context": "linux-clang" },
           { "context": "macos-clang" },
           { "context": "clang-tidy" },
+          { "context": "sanitizers" },
           { "context": "clang-format" },
           { "context": "coverage" },
           { "context": "docs" },
