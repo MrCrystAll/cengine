@@ -33,7 +33,7 @@ The project version is defined **only** in `project(VERSION ...)` in the root `C
 | coverage | `cmake --workflow --preset ci-coverage` then `--target coverage` (GCC, Linux) |
 | sanitizers | `cmake --workflow --preset ci-sanitize` (Clang, Linux/macOS: ASan + UBSan) |
 | docs | `cmake --workflow --preset docs` → `build/docs/docs/html/index.html` |
-| format | `clang-format -i <files>` with **clang-format 20** (CI pins 20.1.0 and fails on unformatted code) |
+| format | `clang-format -i <files>` with **clang-format 20** (CI pins 20.1.0 and fails on unformatted code). In Claude Code, a PostToolUse hook (`.claude/settings.json` → `tools/hooks/clang_format_hook.py`) formats every C++ file it edits |
 | install | `cmake --install build/<preset> --prefix <dir>` |
 
 Build trees are `build/<preset>/` and default installs go to `install/<preset>/`. Never edit them, and
