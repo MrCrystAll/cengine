@@ -1,0 +1,29 @@
+# Build trees (one per preset) and local installs
+/build/
+/install/
+/out/
+vcpkg_installed/
+
+# Personal presets (machine-specific paths, compilers, ...)
+CMakeUserPresets.json
+
+# IDEs / tools
+.vs/
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.cache/
+*.user
+compile_commands.json
+
+# Coverage
+*.gcda
+*.gcno
+*.profraw
+*.profdata
+
+# Python
+__pycache__/
+
+# Claude Code local settings
+.claude/settings.local.json

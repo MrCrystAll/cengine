@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "ms-vscode.cmake-tools",
+    "llvm-vs-code-extensions.vscode-clangd",
+    "matepek.vscode-catch2-test-adapter",
+    "editorconfig.editorconfig"
+  ]
+}

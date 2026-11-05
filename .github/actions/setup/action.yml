@@ -1,0 +1,48 @@
+name: Setup build environment
+description: Ninja, vcpkg (cloned + bootstrapped) with a cached binary archive, MSVC env on Windows.
+
+inputs:
+  cache-key:
+    description: Extra key segment so each job/preset gets its own vcpkg binary cache
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Ninja
+      uses: seanmiddleditch/gha-setup-ninja@v5
+
+    - name: MSVC developer environment
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
+    - name: Export vcpkg paths
+      shell: bash
+      run: |
+        echo "VCPKG_ROOT=${RUNNER_TEMP}/vcpkg" >> "$GITHUB_ENV"
+        echo "VCPKG_DEFAULT_BINARY_CACHE=${RUNNER_TEMP}/vcpkg-binary-cache" >> "$GITHUB_ENV"
+        mkdir -p "${RUNNER_TEMP}/vcpkg-binary-cache"
+
+    - name: Restore vcpkg binary cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/vcpkg-binary-cache
+        key: vcpkg-${{ runner.os }}-${{ inputs.cache-key }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+        restore-keys: |
+          vcpkg-${{ runner.os }}-${{ inputs.cache-key }}-
+
+    - name: Clone vcpkg
+      shell: bash
+      run: git clone --depth 1 https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+
+    - name: Bootstrap vcpkg (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: '& "$env:VCPKG_ROOT\bootstrap-vcpkg.bat" -disableMetrics'
+
+    - name: Bootstrap vcpkg (Unix)
+      if: runner.os != 'Windows'
+      shell: bash
+      run: '"$VCPKG_ROOT/bootstrap-vcpkg.sh" -disableMetrics'

@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:  # reused by release.yml
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Configure -> build -> test (unit + install/package consumer) -> cpack, per platform.
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: windows-msvc,        os: windows-latest, preset: ci-msvc }
+          - { name: windows-msvc-shared, os: windows-latest, preset: ci-msvc-shared }
+          - { name: linux-gcc,           os: ubuntu-24.04,   preset: ci-gcc }
+          - { name: linux-clang,         os: ubuntu-24.04,   preset: ci-clang }
+          - { name: macos-clang,         os: macos-15,       preset: ci-clang }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: ${{ matrix.name }}
+
+      - name: Configure, build, test, package
+        run: cmake --workflow --preset ${{ matrix.preset }}
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-${{ matrix.name }}
+          path: |
+            build/${{ matrix.preset }}/*.zip
+            build/${{ matrix.preset }}/*.tar.gz
+          if-no-files-found: error
+
+      - name: Upload test logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-${{ matrix.name }}
+          path: build/${{ matrix.preset }}/Testing/Temporary/
+
+  tidy:
+    name: clang-tidy
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: tidy
+      - name: Build with clang-tidy (warnings are errors)
+        run: cmake --workflow --preset ci-tidy
+
+  format:
+    name: clang-format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check formatting
+        run: |
+          git ls-files '*.hpp' '*.cpp' '*.h' \
+            | xargs clang-format --dry-run --Werror
+
+  coverage:
+    name: coverage
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: coverage
+      - name: Install gcovr
+        run: pipx install gcovr
+      - name: Build and test (instrumented)
+        run: cmake --workflow --preset ci-coverage
+      - name: Coverage report
+        run: |
+          cmake --build --preset ci-coverage --target coverage | tee coverage.txt
+          {
+            echo '### Coverage'
+            echo '```'
+            cat coverage.txt | tail -n 30
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            build/ci-coverage/coverage.xml
+            build/ci-coverage/coverage/
+
+  docs:
+    name: docs (warnings are errors)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Doxygen, Graphviz, Ninja
+        run: sudo apt-get update && sudo apt-get install -y doxygen graphviz ninja-build
+      - name: Build docs
+        run: cmake --workflow --preset docs

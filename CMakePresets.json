@@ -1,0 +1,218 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "installDir": "${sourceDir}/install/${presetName}",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    { "name": "debug", "hidden": true, "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" } },
+    { "name": "release", "hidden": true, "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" } },
+    {
+      "name": "strict",
+      "hidden": true,
+      "description": "CI quality gate: every warning is an error",
+      "cacheVariables": { "CMAKE_COMPILE_WARNING_AS_ERROR": "ON" }
+    },
+    {
+      "name": "windows",
+      "hidden": true,
+      "inherits": "base",
+      "architecture": { "value": "x64", "strategy": "external" },
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "X_VCPKG_APPLOCAL_DEPS_INSTALL": "ON"
+      },
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "msvc",
+      "hidden": true,
+      "inherits": "windows",
+      "cacheVariables": { "CMAKE_CXX_COMPILER": "cl" }
+    },
+    {
+      "name": "clang-cl",
+      "hidden": true,
+      "inherits": "windows",
+      "cacheVariables": { "CMAKE_CXX_COMPILER": "clang-cl" }
+    },
+    {
+      "name": "unix",
+      "hidden": true,
+      "inherits": "base",
+      "condition": { "type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "gcc",
+      "hidden": true,
+      "inherits": "unix",
+      "cacheVariables": { "CMAKE_CXX_COMPILER": "g++" },
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" }
+    },
+    {
+      "name": "clang",
+      "hidden": true,
+      "inherits": "unix",
+      "cacheVariables": { "CMAKE_CXX_COMPILER": "clang++" }
+    },
+
+    { "name": "msvc-debug", "displayName": "MSVC Debug", "inherits": ["msvc", "debug"] },
+    { "name": "msvc-release", "displayName": "MSVC Release", "inherits": ["msvc", "release"] },
+    { "name": "clang-cl-debug", "displayName": "clang-cl Debug", "inherits": ["clang-cl", "debug"] },
+    { "name": "clang-cl-release", "displayName": "clang-cl Release", "inherits": ["clang-cl", "release"] },
+    { "name": "gcc-debug", "displayName": "GCC Debug", "inherits": ["gcc", "debug"] },
+    { "name": "gcc-release", "displayName": "GCC Release", "inherits": ["gcc", "release"] },
+    { "name": "clang-debug", "displayName": "Clang Debug", "inherits": ["clang", "debug"] },
+    { "name": "clang-release", "displayName": "Clang Release", "inherits": ["clang", "release"] },
+
+    { "name": "ci-msvc", "displayName": "CI: MSVC Release (static)", "inherits": ["msvc", "release", "strict"] },
+    {
+      "name": "ci-msvc-shared",
+      "displayName": "CI: MSVC Release (shared)",
+      "inherits": ["msvc", "release", "strict"],
+      "cacheVariables": { "BUILD_SHARED_LIBS": "ON" }
+    },
+    { "name": "ci-gcc", "displayName": "CI: GCC Release", "inherits": ["gcc", "release", "strict"] },
+    { "name": "ci-clang", "displayName": "CI: Clang Release", "inherits": ["clang", "release", "strict"] },
+    {
+      "name": "ci-tidy",
+      "displayName": "CI: clang-tidy",
+      "inherits": ["clang", "debug", "strict"],
+      "cacheVariables": { "SKEL_ENABLE_CLANG_TIDY": "ON", "SKEL_BUILD_PACKAGE_TEST": "OFF" }
+    },
+    {
+      "name": "ci-coverage",
+      "displayName": "CI: GCC coverage",
+      "inherits": ["gcc", "debug"],
+      "cacheVariables": { "SKEL_ENABLE_COVERAGE": "ON", "SKEL_BUILD_PACKAGE_TEST": "OFF" }
+    },
+    {
+      "name": "docs",
+      "displayName": "Documentation only (no compiler deps, no vcpkg)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "SKEL_BUILD_DOCS": "ON",
+        "SKEL_BUILD_TESTS": "OFF",
+        "SKEL_BUILD_APPS": "OFF",
+        "SKEL_DOCS_WARN_AS_ERROR": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "msvc-debug", "configurePreset": "msvc-debug" },
+    { "name": "msvc-release", "configurePreset": "msvc-release" },
+    { "name": "clang-cl-debug", "configurePreset": "clang-cl-debug" },
+    { "name": "clang-cl-release", "configurePreset": "clang-cl-release" },
+    { "name": "gcc-debug", "configurePreset": "gcc-debug" },
+    { "name": "gcc-release", "configurePreset": "gcc-release" },
+    { "name": "clang-debug", "configurePreset": "clang-debug" },
+    { "name": "clang-release", "configurePreset": "clang-release" },
+    { "name": "ci-msvc", "configurePreset": "ci-msvc" },
+    { "name": "ci-msvc-shared", "configurePreset": "ci-msvc-shared" },
+    { "name": "ci-gcc", "configurePreset": "ci-gcc" },
+    { "name": "ci-clang", "configurePreset": "ci-clang" },
+    { "name": "ci-tidy", "configurePreset": "ci-tidy" },
+    { "name": "ci-coverage", "configurePreset": "ci-coverage" },
+    { "name": "docs", "configurePreset": "docs", "targets": ["docs"] }
+  ],
+  "testPresets": [
+    {
+      "name": "test-base",
+      "hidden": true,
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error", "stopOnFailure": false }
+    },
+    { "name": "msvc-debug", "inherits": "test-base", "configurePreset": "msvc-debug" },
+    { "name": "msvc-release", "inherits": "test-base", "configurePreset": "msvc-release" },
+    { "name": "clang-cl-debug", "inherits": "test-base", "configurePreset": "clang-cl-debug" },
+    { "name": "clang-cl-release", "inherits": "test-base", "configurePreset": "clang-cl-release" },
+    { "name": "gcc-debug", "inherits": "test-base", "configurePreset": "gcc-debug" },
+    { "name": "gcc-release", "inherits": "test-base", "configurePreset": "gcc-release" },
+    { "name": "clang-debug", "inherits": "test-base", "configurePreset": "clang-debug" },
+    { "name": "clang-release", "inherits": "test-base", "configurePreset": "clang-release" },
+    { "name": "ci-msvc", "inherits": "test-base", "configurePreset": "ci-msvc" },
+    { "name": "ci-msvc-shared", "inherits": "test-base", "configurePreset": "ci-msvc-shared" },
+    { "name": "ci-gcc", "inherits": "test-base", "configurePreset": "ci-gcc" },
+    { "name": "ci-clang", "inherits": "test-base", "configurePreset": "ci-clang" },
+    { "name": "ci-tidy", "inherits": "test-base", "configurePreset": "ci-tidy" },
+    { "name": "ci-coverage", "inherits": "test-base", "configurePreset": "ci-coverage" }
+  ],
+  "packagePresets": [
+    { "name": "ci-msvc", "configurePreset": "ci-msvc" },
+    { "name": "ci-msvc-shared", "configurePreset": "ci-msvc-shared" },
+    { "name": "ci-gcc", "configurePreset": "ci-gcc" },
+    { "name": "ci-clang", "configurePreset": "ci-clang" },
+    { "name": "msvc-release", "configurePreset": "msvc-release" },
+    { "name": "gcc-release", "configurePreset": "gcc-release" },
+    { "name": "clang-release", "configurePreset": "clang-release" }
+  ],
+  "workflowPresets": [
+    {
+      "name": "ci-msvc",
+      "steps": [
+        { "type": "configure", "name": "ci-msvc" },
+        { "type": "build", "name": "ci-msvc" },
+        { "type": "test", "name": "ci-msvc" },
+        { "type": "package", "name": "ci-msvc" }
+      ]
+    },
+    {
+      "name": "ci-msvc-shared",
+      "steps": [
+        { "type": "configure", "name": "ci-msvc-shared" },
+        { "type": "build", "name": "ci-msvc-shared" },
+        { "type": "test", "name": "ci-msvc-shared" },
+        { "type": "package", "name": "ci-msvc-shared" }
+      ]
+    },
+    {
+      "name": "ci-gcc",
+      "steps": [
+        { "type": "configure", "name": "ci-gcc" },
+        { "type": "build", "name": "ci-gcc" },
+        { "type": "test", "name": "ci-gcc" },
+        { "type": "package", "name": "ci-gcc" }
+      ]
+    },
+    {
+      "name": "ci-clang",
+      "steps": [
+        { "type": "configure", "name": "ci-clang" },
+        { "type": "build", "name": "ci-clang" },
+        { "type": "test", "name": "ci-clang" },
+        { "type": "package", "name": "ci-clang" }
+      ]
+    },
+    {
+      "name": "ci-tidy",
+      "steps": [
+        { "type": "configure", "name": "ci-tidy" },
+        { "type": "build", "name": "ci-tidy" }
+      ]
+    },
+    {
+      "name": "ci-coverage",
+      "steps": [
+        { "type": "configure", "name": "ci-coverage" },
+        { "type": "build", "name": "ci-coverage" },
+        { "type": "test", "name": "ci-coverage" }
+      ]
+    },
+    {
+      "name": "docs",
+      "steps": [
+        { "type": "configure", "name": "docs" },
+        { "type": "build", "name": "docs" }
+      ]
+    }
+  ]
+}
