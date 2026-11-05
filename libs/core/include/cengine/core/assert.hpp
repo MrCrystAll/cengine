@@ -46,6 +46,10 @@ CENGINE_CORE_EXPORT assert_handler set_assert_handler(assert_handler handler) no
 
 } // namespace cengine::core
 
+// Everything below must be a macro: the condition is stringized, and it must compile out
+// without being evaluated, so no constexpr function can replace these.
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
 /// @def CENGINE_ENABLE_ASSERTS
 /// @brief 1 to compile assertions in, 0 to compile them out. Defaults to 1 unless `NDEBUG` is
 /// defined. Define it on the command line to override.
@@ -65,7 +69,6 @@ CENGINE_CORE_EXPORT assert_handler set_assert_handler(assert_handler handler) no
 #endif
 
 /// @cond CENGINE_INTERNAL
-// NOLINTBEGIN(cppcoreguidelines-macro-usage): stringizing and compiling out need macros.
 #define CENGINE_DETAIL_ASSERT_CHECK(condition, message)                                            \
     (static_cast<bool>(condition)                                                                  \
          ? static_cast<void>(0)                                                                    \
@@ -89,7 +92,6 @@ CENGINE_CORE_EXPORT assert_handler set_assert_handler(assert_handler handler) no
 #define CENGINE_DETAIL_ASSERT_SLOW(condition, message)                                             \
     CENGINE_DETAIL_ASSERT_SKIP(condition, message)
 #endif
-// NOLINTEND(cppcoreguidelines-macro-usage)
 /// @endcond
 
 /// @brief Checks an invariant: calls the assertion handler if @p condition is false.
@@ -104,3 +106,5 @@ CENGINE_CORE_EXPORT assert_handler set_assert_handler(assert_handler handler) no
 /// @param condition Expression that must be true.
 /// @param message Short explanation of the invariant (string literal).
 #define CENGINE_ASSERT_SLOW(condition, message) CENGINE_DETAIL_ASSERT_SLOW(condition, message)
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
