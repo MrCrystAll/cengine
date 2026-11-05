@@ -9,8 +9,8 @@ A consistent error-handling policy across many modules makes APIs predictable an
 
 ## Decision
 
-- Recoverable failures are returned as `skel::core::result<T>` (`std::expected<T, error>`),
-  built with `skel::core::make_error(errc, message)`.
+- Recoverable failures are returned as `cengine::core::result<T>` (`std::expected<T, error>`),
+  built with `cengine::core::make_error(errc, message)`.
 - Exceptions are reserved for programming errors and truly exceptional states (allocation
   failure, broken invariants). They must not cross module boundaries as a normal control path.
 - Functions that cannot fail are `noexcept` where meaningful.

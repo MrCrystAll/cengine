@@ -1,6 +1,6 @@
 include_guard(GLOBAL)
 
-if(NOT SKEL_BUILD_DOCS)
+if(NOT CENGINE_BUILD_DOCS)
   return()
 endif()
 
@@ -15,8 +15,8 @@ FetchContent_Declare(doxygen_awesome_css
   DOWNLOAD_EXTRACT_TIMESTAMP ON)
 FetchContent_MakeAvailable(doxygen_awesome_css)
 
-get_property(_skel_doc_inputs GLOBAL PROPERTY SKEL_DOC_INPUTS)
-get_property(_skel_export_macros GLOBAL PROPERTY SKEL_EXPORT_MACROS)
+get_property(_cengine_doc_inputs GLOBAL PROPERTY CENGINE_DOC_INPUTS)
+get_property(_cengine_export_macros GLOBAL PROPERTY CENGINE_EXPORT_MACROS)
 
 set(DOXYGEN_PROJECT_NAME "${PROJECT_NAME}")
 set(DOXYGEN_PROJECT_NUMBER "${PROJECT_VERSION}")
@@ -28,18 +28,18 @@ set(DOXYGEN_EXCLUDE_PATTERNS */export.hpp)
 set(DOXYGEN_RECURSIVE YES)
 set(DOXYGEN_IMPLICIT_DIR_DOCS NO)  # README.md files are pages (with {#anchors}), not dir docs
 set(DOXYGEN_STRIP_FROM_PATH "${PROJECT_SOURCE_DIR}")
-set(DOXYGEN_STRIP_FROM_INC_PATH ${_skel_doc_inputs})
+set(DOXYGEN_STRIP_FROM_INC_PATH ${_cengine_doc_inputs})
 set(DOXYGEN_EXTRACT_ALL NO)
 set(DOXYGEN_EXTRACT_PRIVATE NO)
 set(DOXYGEN_WARN_IF_UNDOCUMENTED YES)
 set(DOXYGEN_WARN_NO_PARAMDOC YES)
-if(SKEL_DOCS_WARN_AS_ERROR)
+if(CENGINE_DOCS_WARN_AS_ERROR)
   set(DOXYGEN_WARN_AS_ERROR FAIL_ON_WARNINGS)
 endif()
 set(DOXYGEN_ENABLE_PREPROCESSING YES)
 set(DOXYGEN_MACRO_EXPANSION YES)
 set(DOXYGEN_EXPAND_ONLY_PREDEF YES)
-set(DOXYGEN_PREDEFINED ${_skel_export_macros})
+set(DOXYGEN_PREDEFINED ${_cengine_export_macros})
 set(DOXYGEN_IMAGE_PATH "${PROJECT_SOURCE_DIR}/docs/images")
 set(DOXYGEN_GENERATE_LATEX NO)
 set(DOXYGEN_GENERATE_TREEVIEW YES)
@@ -53,11 +53,11 @@ set(DOXYGEN_HAVE_DOT ${DOXYGEN_DOT_FOUND})
 
 doxygen_add_docs(docs
   "${PROJECT_SOURCE_DIR}/docs"
-  ${_skel_doc_inputs}
+  ${_cengine_doc_inputs}
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   COMMENT "Generating API documentation with Doxygen -> ${DOXYGEN_OUTPUT_DIRECTORY}/html")
 
-if(SKEL_INSTALL)
+if(CENGINE_INSTALL)
   install(DIRECTORY "${DOXYGEN_OUTPUT_DIRECTORY}/html/"
     DESTINATION "${CMAKE_INSTALL_DOCDIR}/html"
     COMPONENT ${PROJECT_NAME}_docs

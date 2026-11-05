@@ -30,7 +30,7 @@ ctest --preset <p> -R "core\\.result"   # by name
 
 ## Conventions (Catch2 v3)
 
-- One test file per header under test: `include/skel/x/foo.hpp` -> `tests/test_foo.cpp`.
+- One test file per header under test: `include/cengine/x/foo.hpp` -> `tests/test_foo.cpp`.
 - `TEST_CASE("<behaviour in plain English>", "[<module>][<topic>]")`.
 - Use `SECTION` for variants sharing setup, `GENERATE` for tables of inputs.
 - `REQUIRE` when continuing makes no sense, `CHECK` otherwise; `STATIC_REQUIRE` for `constexpr`.

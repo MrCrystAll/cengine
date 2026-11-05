@@ -5,7 +5,7 @@ date when a convention changes. Record *why* in an ADR under `docs/adr/`.
 
 ## Project in one paragraph
 
-`skel` (a **placeholder name**: the theme isn't decided yet, and `tools/rename_project.py` renames it) is a
+`cengine` (a **placeholder name**: the theme isn't decided yet, and `tools/rename_project.py` renames it) is a
 **C++23 monorepo of many small modules ("microprojects")**. Each library lives in `libs/<module>/`, and
 apps in `apps/` are thin front-ends. The project is **test-driven** (Catch2 v3 + CTest). It uses **vcpkg
 manifest mode** for third-party code, **Doxygen** for docs, and **GitHub Actions** CI on Windows, Linux and macOS.
@@ -47,16 +47,16 @@ never commit them.
 ## Architecture rules
 
 - **Logic lives in `libs/`.** `apps/` only parse input, wire modules, and do I/O.
-- Create every target through the helpers in `cmake/SkelModule.cmake`:
-  `skel_add_library`, `skel_add_executable`, `skel_add_tests`. Don't call `add_library` /
+- Create every target through the helpers in `cmake/CengineModule.cmake`:
+  `cengine_add_library`, `cengine_add_executable`, `cengine_add_tests`. Don't call `add_library` /
   `install` by hand for project code; extend the helper instead, so every module stays uniform.
-- A module uses another only via `skel::<other>` in `PUBLIC_DEPS` (appears in its public headers)
+- A module uses another only via `cengine::<other>` in `PUBLIC_DEPS` (appears in its public headers)
   or `PRIVATE_DEPS` (implementation only). No includes into another module's `src/`, no `../` includes.
 - Dependencies point downwards (`core` depends on nothing). No cycles.
-- Public headers: `libs/<m>/include/skel/<m>/*.hpp`, included as `<skel/<m>/x.hpp>`. Everything
+- Public headers: `libs/<m>/include/cengine/<m>/*.hpp`, included as `<cengine/<m>/x.hpp>`. Everything
   there is installed API: keep it minimal, and put details in `src/`.
-- Shared-lib safety: non-inline public functions/classes get `SKEL_<M>_EXPORT` from
-  `<skel/<m>/export.hpp>` (generated). Symbols are hidden by default. The `ci-msvc-shared` preset
+- Shared-lib safety: non-inline public functions/classes get `CENGINE_<M>_EXPORT` from
+  `<cengine/<m>/export.hpp>` (generated). Symbols are hidden by default. The `ci-msvc-shared` preset
   catches missing exports.
 - New module: follow `docs/guides/adding-a-module.md` exactly (CMake, tests, README, add it to
   `libs/CMakeLists.txt`, and add rows to the module tables in `README.md` and `docs/index.md`).
@@ -67,15 +67,15 @@ never commit them.
   library feature works on all three CI platforms before relying on it (e.g. `std::print`
   isn't used yet because of older Apple libc++).
 - **Naming**: std-like `snake_case` for types, functions, variables, namespaces, enums and enumerators.
-  Template parameters are `CamelCase`, macros are `UPPER_CASE` with a `SKEL_` prefix, and private/protected data
+  Template parameters are `CamelCase`, macros are `UPPER_CASE` with a `CENGINE_` prefix, and private/protected data
   members end in `_`. Enforced by `.clang-tidy`.
-- Namespace is `skel::<module>`. Files are `snake_case.hpp` / `.cpp`; tests are `test_<header>.cpp`.
-- **Errors**: recoverable failures return `skel::core::result<T>` (`std::expected<T, error>`),
+- Namespace is `cengine::<module>`. Files are `snake_case.hpp` / `.cpp`; tests are `test_<header>.cpp`.
+- **Errors**: recoverable failures return `cengine::core::result<T>` (`std::expected<T, error>`),
   built with `make_error(errc, msg)`. Exceptions are only for programming errors and truly
   exceptional states. Mark results `[[nodiscard]]` and use `noexcept` where it's meaningful.
 - Formatting: `.clang-format` (4 spaces, 100 columns, braces always). Include order: project,
   third-party, std.
-- Warnings: the high warning set lives in `cmake/SkelCompilerOptions.cmake`, and CI treats warnings as errors.
+- Warnings: the high warning set lives in `cmake/CengineCompilerOptions.cmake`, and CI treats warnings as errors.
   Fix warnings; don't suppress them. If a suppression is unavoidable, make it local and add a comment
   explaining why.
 
@@ -92,7 +92,7 @@ never commit them.
 - Third-party code comes **only** through `vcpkg.json` (pinned by the baseline in
   `vcpkg-configuration.json`). No vendored code, and no `FetchContent` for libraries.
 - Test-only or optional deps go in a vcpkg *feature*, mapped from a CMake option before
-  `project()` in the root `CMakeLists.txt` (see `SKEL_BUILD_TESTS` → `tests`).
+  `project()` in the root `CMakeLists.txt` (see `CENGINE_BUILD_TESTS` → `tests`).
 - In the module: `PACKAGES <find_package name>` + the imported target in `PUBLIC_DEPS`/`PRIVATE_DEPS`.
   This makes installed consumers re-find it automatically.
 - **Ask the user before adding any new third-party dependency** or bumping the baseline.
@@ -108,12 +108,12 @@ never commit them.
 | File | Role |
 |---|---|
 | `CMakeLists.txt` | top level: pre-`project()` vcpkg features, includes, subdirectories |
-| `cmake/SkelOptions.cmake` | all `SKEL_*` options |
-| `cmake/SkelProjectSettings.cmake` | output dirs, RPATH, install dirs (top-level only) |
-| `cmake/SkelCompilerOptions.cmake` | `skel_project_options` (warnings, coverage), clang-tidy |
-| `cmake/SkelModule.cmake` | **the module helpers**, plus per-module install/export files |
-| `cmake/SkelInstall.cmake`, `skel-config.cmake.in` | the `skel` CMake package (components = modules) |
-| `cmake/SkelDocs.cmake` | Doxygen + doxygen-awesome-css |
-| `cmake/SkelPackaging.cmake` | CPack |
+| `cmake/CengineOptions.cmake` | all `CENGINE_*` options |
+| `cmake/CengineProjectSettings.cmake` | output dirs, RPATH, install dirs (top-level only) |
+| `cmake/CengineCompilerOptions.cmake` | `cengine_project_options` (warnings, coverage), clang-tidy |
+| `cmake/CengineModule.cmake` | **the module helpers**, plus per-module install/export files |
+| `cmake/CengineInstall.cmake`, `cengine-config.cmake.in` | the `cengine` CMake package (components = modules) |
+| `cmake/CengineDocs.cmake` | Doxygen + doxygen-awesome-css |
+| `cmake/CenginePackaging.cmake` | CPack |
 | `tests/CMakeLists.txt`, `tests/package/` | install + `find_package` consumer test |
 | `.github/workflows/` | `ci.yml`, `docs.yml` (Pages), `release.yml` (tags `vX.Y.Z`) |

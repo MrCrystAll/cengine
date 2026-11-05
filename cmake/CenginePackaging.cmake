@@ -1,6 +1,6 @@
 include_guard(GLOBAL)
 
-if(NOT PROJECT_IS_TOP_LEVEL OR NOT SKEL_INSTALL)
+if(NOT PROJECT_IS_TOP_LEVEL OR NOT CENGINE_INSTALL)
   return()
 endif()
 
@@ -16,11 +16,11 @@ set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.md")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}")
 
 if(BUILD_SHARED_LIBS)
-  set(_skel_link "shared")
+  set(_cengine_link "shared")
 else()
-  set(_skel_link "static")
+  set(_cengine_link "static")
 endif()
-string(TOLOWER "${PROJECT_NAME}-${PROJECT_VERSION}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}-${_skel_link}"
+string(TOLOWER "${PROJECT_NAME}-${PROJECT_VERSION}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}-${_cengine_link}"
        CPACK_PACKAGE_FILE_NAME)
 
 if(WIN32)

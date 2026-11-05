@@ -10,7 +10,7 @@ heavy toolchain. Alternatives: Sphinx + Breathe (two tools, Python deps), MkDocs
 
 ## Decision
 
-Doxygen, driven from CMake (`doxygen_add_docs`, `SKEL_BUILD_DOCS`, preset `docs`), themed with
+Doxygen, driven from CMake (`doxygen_add_docs`, `CENGINE_BUILD_DOCS`, preset `docs`), themed with
 doxygen-awesome-css (fetched at configure time, pinned by tag). Guides and ADRs are Markdown
 pages in `docs/`; each module's `README.md` becomes its page. CI fails on any Doxygen warning
 and publishes to GitHub Pages.

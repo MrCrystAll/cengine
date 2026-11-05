@@ -5,7 +5,7 @@
 ///
 /// Recoverable failures are returned, never thrown:
 /// @code
-/// skel::core::result<config> load(std::string_view path);
+/// cengine::core::result<config> load(std::string_view path);
 /// @endcode
 /// Exceptions are reserved for programming errors / truly exceptional states.
 
@@ -13,7 +13,7 @@
 #include <string>
 #include <utility>
 
-namespace skel::core {
+namespace cengine::core {
 
 /// @brief Category of a recoverable failure. Extend as modules need it.
 enum class errc {
@@ -46,4 +46,4 @@ using result = std::expected<T, error>;
     return std::unexpected<error>{error{code, std::move(message)}};
 }
 
-} // namespace skel::core
+} // namespace cengine::core

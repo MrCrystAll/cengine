@@ -8,7 +8,7 @@ Example: a new library `geometry` that depends on `core`.
 libs/geometry/
 ├── CMakeLists.txt
 ├── README.md
-├── include/skel/geometry/vector.hpp
+├── include/cengine/geometry/vector.hpp
 ├── src/vector.cpp
 └── tests/
     ├── CMakeLists.txt
@@ -18,10 +18,10 @@ libs/geometry/
 ## 2. `libs/geometry/CMakeLists.txt`
 
 ```cmake
-skel_add_library(geometry
-  HEADERS      include/skel/geometry/vector.hpp
+cengine_add_library(geometry
+  HEADERS      include/cengine/geometry/vector.hpp
   SOURCES      src/vector.cpp
-  PUBLIC_DEPS  skel::core          # appears in public headers
+  PUBLIC_DEPS  cengine::core          # appears in public headers
   # PRIVATE_DEPS fmt::fmt          # implementation only
   # PACKAGES     fmt               # find_package() names for third-party deps
 )
@@ -33,7 +33,7 @@ Header-only module: add `HEADER_ONLY` and omit `SOURCES`.
 ## 3. `libs/geometry/tests/CMakeLists.txt`
 
 ```cmake
-skel_add_tests(geometry
+cengine_add_tests(geometry
   SOURCES test_vector.cpp
 )
 ```
@@ -46,7 +46,7 @@ Add `add_subdirectory(geometry)` to `libs/CMakeLists.txt`, and a row in the modu
 ## 5. Write the first failing test, then the code
 
 See @ref testing. Public API must carry Doxygen comments (`///`), and exported symbols need
-`SKEL_GEOMETRY_EXPORT` from `<skel/geometry/export.hpp>`.
+`CENGINE_GEOMETRY_EXPORT` from `<cengine/geometry/export.hpp>`.
 
 ## 6. Third-party dependency?
 
@@ -55,8 +55,8 @@ and the package name in `PACKAGES`. The generated package config re-finds it for
 
 ## What you get for free
 
-- target `skel_geometry`, alias `skel::geometry`, export header, `cxx_std_23`, warnings, tidy
-- install rules (component `skel_geometry` / `skel_geometry_dev`) and
-  `find_package(skel COMPONENTS geometry)` support
+- target `cengine_geometry`, alias `cengine::geometry`, export header, `cxx_std_23`, warnings, tidy
+- install rules (component `cengine_geometry` / `cengine_geometry_dev`) and
+  `find_package(cengine COMPONENTS geometry)` support
 - CTest registration with label `geometry` (`ctest --preset <p> -L geometry`)
 - docs: headers and `README.md` are added to the Doxygen site

@@ -1,4 +1,4 @@
-# skel documentation {#mainpage}
+# cengine documentation {#mainpage}
 
 Modular C++23 monorepo: a set of small, independently testable and installable
 libraries ("modules") plus thin applications built on top of them.
@@ -19,6 +19,6 @@ libraries ("modules") plus thin applications built on top of them.
 
 | Module | Target | Description |
 |---|---|---|
-| @ref module_core "core" | `skel::core` | Foundation types: version, `result<T>` / error policy |
+| @ref module_core "core" | `cengine::core` | Foundation types: version, `result<T>` / error policy |
 
 API reference: see the **Namespaces** and **Files** sections in the sidebar.

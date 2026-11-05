@@ -1,16 +1,16 @@
-# skel
+# cengine
 
 > **Placeholder name.** The project theme isn't chosen yet. Once you have a name, run
 > `python tools/rename_project.py <newname>` to rename everything in one go (see [Renaming](#renaming)).
 
-skel is a modular **C++23** monorepo. It is a set of small, independently tested and
+cengine is a modular **C++23** monorepo. It is a set of small, independently tested and
 installable libraries (*modules*) plus thin applications that use them.
 
 - **Separation of concerns**: all logic lives in libraries under `libs/`. Apps under `apps/` only wire them together.
 - **Test-driven**: Catch2 v3 and CTest. Every module has unit tests, the apps have smoke tests,
   and a package test installs the project and builds an external consumer.
 - **Dependencies**: vcpkg manifest mode, pinned baseline, optional features, overlay ports.
-- **Install and package**: a CMake package with one component per module (`find_package(skel COMPONENTS core)`),
+- **Install and package**: a CMake package with one component per module (`find_package(cengine COMPONENTS core)`),
   plus CPack archives for every platform.
 - **Docs**: Doxygen with the doxygen-awesome-css theme, published to GitHub Pages.
 - **CI** (GitHub Actions): Windows (MSVC static and shared), Linux (GCC, Clang), and macOS (Clang).
@@ -29,7 +29,7 @@ On Windows, use a *Developer PowerShell for VS* (or an IDE) so `cl` is on `PATH`
 cmake --preset msvc-debug            # Linux: gcc-debug / clang-debug, macOS: clang-debug
 cmake --build --preset msvc-debug
 ctest --preset msvc-debug
-build/msvc-debug/bin/skel-cli        # -> "skel-cli 0.1.0"
+build/msvc-debug/bin/cengine-cli        # -> "cengine-cli 0.1.0"
 ```
 
 To run the full CI pipeline locally (configure, build, test, package):
@@ -43,10 +43,10 @@ cmake --workflow --preset ci-msvc    # ci-gcc, ci-clang, ci-tidy, ci-coverage, d
 ## Repository layout
 
 ```
-libs/<module>/      a microproject: include/skel/<module>/ (public), src/ (private), tests/, README.md
-apps/<app>/         thin executables (currently: cli -> skel-cli)
+libs/<module>/      a microproject: include/cengine/<module>/ (public), src/ (private), tests/, README.md
+apps/<app>/         thin executables (currently: cli -> cengine-cli)
 tests/              cross-module tests + package consumer (tests/package)
-cmake/              build helpers: SkelModule.cmake (skel_add_library/executable/tests), install, docs, packaging
+cmake/              build helpers: CengineModule.cmake (cengine_add_library/executable/tests), install, docs, packaging
 docs/               guides, ADRs (architecture decisions), Doxygen main page
 vcpkg.json          third-party dependencies; vcpkg-configuration.json pins the baseline
 vcpkg/              overlay ports and triplets
@@ -57,11 +57,11 @@ vcpkg/              overlay ports and triplets
 
 | Module | Target | Description |
 |---|---|---|
-| [core](libs/core/README.md) | `skel::core` | Foundation: version info, `result<T>` / error policy |
+| [core](libs/core/README.md) | `cengine::core` | Foundation: version info, `result<T>` / error policy |
 
 Adding a module takes about 10 lines of CMake. See [docs/guides/adding-a-module.md](docs/guides/adding-a-module.md).
 
-## Integrating skel in another project
+## Integrating cengine in another project
 
 ### Option 1: installed package (recommended)
 
@@ -72,8 +72,8 @@ cmake --install build/msvc-release --prefix <prefix>
 
 ```cmake
 # your CMakeLists.txt
-find_package(skel 0.1 CONFIG REQUIRED COMPONENTS core)   # omit COMPONENTS to load every module
-target_link_libraries(your_target PRIVATE skel::core)
+find_package(cengine 0.1 CONFIG REQUIRED COMPONENTS core)   # omit COMPONENTS to load every module
+target_link_libraries(your_target PRIVATE cengine::core)
 ```
 
 Configure your project with `-DCMAKE_PREFIX_PATH=<prefix>`. [tests/package](tests/package) is a
@@ -83,31 +83,31 @@ complete consumer that CI checks.
 
 ```cmake
 include(FetchContent)
-FetchContent_Declare(skel GIT_REPOSITORY https://github.com/OWNER/skel.git GIT_TAG v0.1.0)
-FetchContent_MakeAvailable(skel)
-target_link_libraries(your_target PRIVATE skel::core)
+FetchContent_Declare(cengine GIT_REPOSITORY https://github.com/OWNER/cengine.git GIT_TAG v0.1.0)
+FetchContent_MakeAvailable(cengine)
+target_link_libraries(your_target PRIVATE cengine::core)
 ```
 
-When skel isn't the top-level project, it builds only the libraries. Tests and install rules stay off,
+When cengine isn't the top-level project, it builds only the libraries. Tests and install rules stay off,
 and it sets no global flags. The third-party dependencies in `vcpkg.json` must still be findable by your project.
 
 ### Option 3: binary archive
 
-Download `skel-<version>-<os>-<arch>-<static|shared>.{zip,tar.gz}` from the GitHub Releases page,
+Download `cengine-<version>-<os>-<arch>-<static|shared>.{zip,tar.gz}` from the GitHub Releases page,
 extract it, and point `CMAKE_PREFIX_PATH` at it.
 
 ## Install and package
 
 ```bash
-cmake --install build/<preset> [--prefix <dir>] [--component skel_cli]
+cmake --install build/<preset> [--prefix <dir>] [--component cengine_cli]
 cpack --preset ci-msvc                           # ZIP on Windows, TGZ elsewhere
 ```
 
 | Component | Content |
 |---|---|
-| `skel_<module>` / `skel_<module>_dev` | runtime library / headers + CMake files |
-| `skel_<app>` | an application |
-| `skel_dev`, `skel_docs` | package config + README/LICENSE, HTML docs |
+| `cengine_<module>` / `cengine_<module>_dev` | runtime library / headers + CMake files |
+| `cengine_<app>` | an application |
+| `cengine_dev`, `cengine_docs` | package config + README/LICENSE, HTML docs |
 
 Details: [docs/guides/install-and-package.md](docs/guides/install-and-package.md).
 
@@ -115,13 +115,13 @@ Details: [docs/guides/install-and-package.md](docs/guides/install-and-package.md
 
 | Option | Default | Effect |
 |---|---|---|
-| `SKEL_BUILD_TESTS` | ON if top-level | unit/smoke tests; enables the vcpkg `tests` feature |
-| `SKEL_BUILD_APPS` | ON | build `apps/` |
-| `SKEL_BUILD_PACKAGE_TEST` | = tests | CTest that installs and builds `tests/package` (label `package`) |
-| `SKEL_INSTALL` | ON if top-level | install rules + CMake package |
-| `SKEL_BUILD_DOCS` | OFF | `docs` target (Doxygen) |
-| `SKEL_ENABLE_CLANG_TIDY` | OFF | clang-tidy while compiling libs/apps |
-| `SKEL_ENABLE_COVERAGE` | OFF | `--coverage` + `coverage` target (gcovr) |
+| `CENGINE_BUILD_TESTS` | ON if top-level | unit/smoke tests; enables the vcpkg `tests` feature |
+| `CENGINE_BUILD_APPS` | ON | build `apps/` |
+| `CENGINE_BUILD_PACKAGE_TEST` | = tests | CTest that installs and builds `tests/package` (label `package`) |
+| `CENGINE_INSTALL` | ON if top-level | install rules + CMake package |
+| `CENGINE_BUILD_DOCS` | OFF | `docs` target (Doxygen) |
+| `CENGINE_ENABLE_CLANG_TIDY` | OFF | clang-tidy while compiling libs/apps |
+| `CENGINE_ENABLE_COVERAGE` | OFF | `--coverage` + `coverage` target (gcovr) |
 | `BUILD_SHARED_LIBS` | OFF | shared libraries (exports handled by generated headers) |
 
 Put personal overrides in an untracked `CMakeUserPresets.json`.
@@ -158,8 +158,8 @@ Guides live in [docs/guides](docs/guides) and architecture decisions in [docs/ad
 python tools/rename_project.py <newname>      # e.g. "orbit" -> orbit::core, ORBIT_BUILD_TESTS, orbit-cli
 ```
 
-This rewrites identifiers (`skel`, `Skel`, `SKEL`) in tracked text files and renames paths such as
-`include/skel/` and `cmake/Skel*.cmake`. Words like "skeleton" aren't touched. Delete your `build/`
+This rewrites identifiers (`cengine`, `Cengine`, `CENGINE`) in tracked text files and renames paths such as
+`include/cengine/` and `cmake/Cengine*.cmake`. Words like "skeleton" aren't touched. Delete your `build/`
 folder afterwards. Also replace `OWNER` in the URLs (`CMakeLists.txt`, this README) with your GitHub account.
 
 ## License

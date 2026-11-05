@@ -1,10 +1,10 @@
-#include <skel/core/core.hpp>
-#include <skel/core/version.hpp>
+#include <cengine/core/core.hpp>
+#include <cengine/core/version.hpp>
 
-namespace skel::core {
+namespace cengine::core {
 
 std::string_view linked_version() noexcept {
     return version_string;
 }
 
-} // namespace skel::core
+} // namespace cengine::core

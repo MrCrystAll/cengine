@@ -1,5 +1,5 @@
 ---
-# Run in CI via the ci-tidy preset (SKEL_ENABLE_CLANG_TIDY=ON); warnings become errors there.
+# Run in CI via the ci-tidy preset (CENGINE_ENABLE_CLANG_TIDY=ON); warnings become errors there.
 Checks: >
   -*,
   bugprone-*,

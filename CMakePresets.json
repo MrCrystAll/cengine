@@ -86,13 +86,13 @@
       "name": "ci-tidy",
       "displayName": "CI: clang-tidy",
       "inherits": ["clang", "debug", "strict"],
-      "cacheVariables": { "SKEL_ENABLE_CLANG_TIDY": "ON", "SKEL_BUILD_PACKAGE_TEST": "OFF" }
+      "cacheVariables": { "CENGINE_ENABLE_CLANG_TIDY": "ON", "CENGINE_BUILD_PACKAGE_TEST": "OFF" }
     },
     {
       "name": "ci-coverage",
       "displayName": "CI: GCC coverage",
       "inherits": ["gcc", "debug"],
-      "cacheVariables": { "SKEL_ENABLE_COVERAGE": "ON", "SKEL_BUILD_PACKAGE_TEST": "OFF" }
+      "cacheVariables": { "CENGINE_ENABLE_COVERAGE": "ON", "CENGINE_BUILD_PACKAGE_TEST": "OFF" }
     },
     {
       "name": "docs",
@@ -100,10 +100,10 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
-        "SKEL_BUILD_DOCS": "ON",
-        "SKEL_BUILD_TESTS": "OFF",
-        "SKEL_BUILD_APPS": "OFF",
-        "SKEL_DOCS_WARN_AS_ERROR": "ON"
+        "CENGINE_BUILD_DOCS": "ON",
+        "CENGINE_BUILD_TESTS": "OFF",
+        "CENGINE_BUILD_APPS": "OFF",
+        "CENGINE_DOCS_WARN_AS_ERROR": "ON"
       }
     }
   ],

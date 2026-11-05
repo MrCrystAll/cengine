@@ -11,7 +11,7 @@ The project is TDD-driven: tests are written first and must be cheap to write an
 
 Catch2 v3 (via the vcpkg `tests` feature), discovered by CTest through `catch_discover_tests`
 so each `TEST_CASE` is an individual CTest test. Every module has a `tests/` folder registered
-with `skel_add_tests()`. A package test verifies the installed CMake package.
+with `cengine_add_tests()`. A package test verifies the installed CMake package.
 
 ## Consequences
 

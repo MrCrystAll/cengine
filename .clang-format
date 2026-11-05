@@ -20,8 +20,8 @@ SeparateDefinitionBlocks: Always
 SortIncludes: CaseSensitive
 IncludeBlocks: Regroup
 IncludeCategories:
-  # 1. project headers: <skel/...>
-  - Regex: '^<skel/'
+  # 1. project headers: <cengine/...>
+  - Regex: '^<cengine/'
     Priority: 1
   # 2. third-party headers: <foo/bar.hpp>, <foo.h>
   - Regex: '^<.*\.(h|hpp|hxx)>'

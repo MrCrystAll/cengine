@@ -1,14 +1,14 @@
 include_guard(GLOBAL)
 
 # -----------------------------------------------------------------------------
-# skel_project_options: INTERFACE target carrying warnings / coverage flags.
-# Linked PRIVATELY (and BUILD_INTERFACE only) by every skel target, so none of
+# cengine_project_options: INTERFACE target carrying warnings / coverage flags.
+# Linked PRIVATELY (and BUILD_INTERFACE only) by every cengine target, so none of
 # these flags ever leak to consumers of the installed package.
 # Warnings-as-errors is NOT set here: use CMAKE_COMPILE_WARNING_AS_ERROR (CI presets do).
 # -----------------------------------------------------------------------------
-add_library(skel_project_options INTERFACE)
+add_library(cengine_project_options INTERFACE)
 
-set(_skel_gnu_style_warnings
+set(_cengine_gnu_style_warnings
   -Wshadow
   -Wnon-virtual-dtor
   -Wold-style-cast
@@ -23,13 +23,13 @@ set(_skel_gnu_style_warnings
   -Wimplicit-fallthrough)
 
 if(MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")  # clang-cl: MSVC driver, Clang warnings
-  target_compile_options(skel_project_options INTERFACE
+  target_compile_options(cengine_project_options INTERFACE
     /W4
     /permissive-
     /utf-8
-    ${_skel_gnu_style_warnings})
+    ${_cengine_gnu_style_warnings})
 elseif(MSVC)  # cl.exe
-  target_compile_options(skel_project_options INTERFACE
+  target_compile_options(cengine_project_options INTERFACE
     /W4
     /permissive-
     /utf-8
@@ -49,14 +49,14 @@ elseif(MSVC)  # cl.exe
     /w14928 # illegal copy-initialization
   )
 else()
-  target_compile_options(skel_project_options INTERFACE
+  target_compile_options(cengine_project_options INTERFACE
     -Wall
     -Wextra
     -Wpedantic
-    ${_skel_gnu_style_warnings}
+    ${_cengine_gnu_style_warnings}
   )
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(skel_project_options INTERFACE
+    target_compile_options(cengine_project_options INTERFACE
       -Wmisleading-indentation
       -Wduplicated-cond
       -Wduplicated-branches
@@ -68,29 +68,29 @@ endif()
 # -----------------------------------------------------------------------------
 # Coverage
 # -----------------------------------------------------------------------------
-if(SKEL_ENABLE_COVERAGE)
+if(CENGINE_ENABLE_COVERAGE)
   if(MSVC)
-    message(FATAL_ERROR "SKEL_ENABLE_COVERAGE is only supported with GCC/Clang")
+    message(FATAL_ERROR "CENGINE_ENABLE_COVERAGE is only supported with GCC/Clang")
   endif()
-  target_compile_options(skel_project_options INTERFACE --coverage -O0 -g)
-  target_link_options(skel_project_options INTERFACE --coverage)
+  target_compile_options(cengine_project_options INTERFACE --coverage -O0 -g)
+  target_link_options(cengine_project_options INTERFACE --coverage)
 
-  find_program(SKEL_GCOVR gcovr)
-  if(SKEL_GCOVR)
-    set(_skel_gcov_args "")
+  find_program(CENGINE_GCOVR gcovr)
+  if(CENGINE_GCOVR)
+    set(_cengine_gcov_args "")
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-      find_program(SKEL_LLVM_COV NAMES llvm-cov llvm-cov-20 llvm-cov-19 llvm-cov-18)
-      if(SKEL_LLVM_COV)
-        set(_skel_gcov_args --gcov-executable "${SKEL_LLVM_COV} gcov")
+      find_program(CENGINE_LLVM_COV NAMES llvm-cov llvm-cov-20 llvm-cov-19 llvm-cov-18)
+      if(CENGINE_LLVM_COV)
+        set(_cengine_gcov_args --gcov-executable "${CENGINE_LLVM_COV} gcov")
       endif()
     endif()
     add_custom_target(coverage
-      COMMAND "${SKEL_GCOVR}"
+      COMMAND "${CENGINE_GCOVR}"
               --root "${PROJECT_SOURCE_DIR}"
               --object-directory "${PROJECT_BINARY_DIR}"
               --filter "${PROJECT_SOURCE_DIR}/libs/"
               --exclude ".*/tests/.*"
-              ${_skel_gcov_args}
+              ${_cengine_gcov_args}
               --print-summary
               --txt
               --xml-pretty --xml "${PROJECT_BINARY_DIR}/coverage.xml"
@@ -104,12 +104,12 @@ if(SKEL_ENABLE_COVERAGE)
 endif()
 
 # -----------------------------------------------------------------------------
-# clang-tidy (applied per target by skel_add_library / skel_add_executable)
+# clang-tidy (applied per target by cengine_add_library / cengine_add_executable)
 # -----------------------------------------------------------------------------
-if(SKEL_ENABLE_CLANG_TIDY)
-  find_program(SKEL_CLANG_TIDY_EXE NAMES clang-tidy clang-tidy-20 clang-tidy-19 clang-tidy-18 REQUIRED)
-  set(SKEL_CLANG_TIDY_COMMAND "${SKEL_CLANG_TIDY_EXE}" "--config-file=${PROJECT_SOURCE_DIR}/.clang-tidy")
+if(CENGINE_ENABLE_CLANG_TIDY)
+  find_program(CENGINE_CLANG_TIDY_EXE NAMES clang-tidy clang-tidy-20 clang-tidy-19 clang-tidy-18 REQUIRED)
+  set(CENGINE_CLANG_TIDY_COMMAND "${CENGINE_CLANG_TIDY_EXE}" "--config-file=${PROJECT_SOURCE_DIR}/.clang-tidy")
   if(CMAKE_COMPILE_WARNING_AS_ERROR)
-    list(APPEND SKEL_CLANG_TIDY_COMMAND "--warnings-as-errors=*")
+    list(APPEND CENGINE_CLANG_TIDY_COMMAND "--warnings-as-errors=*")
   endif()
 endif()

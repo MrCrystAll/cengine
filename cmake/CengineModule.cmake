@@ -5,46 +5,46 @@ include(GenerateExportHeader)
 # Module helpers. Every microproject goes through these functions so that all
 # modules are built, tested, installed and exported the same way.
 #
-#   skel_add_library(<name> ...)     -> target skel_<name>, alias skel::<name>
-#   skel_add_executable(<name> ...)  -> target skel_<name>, binary "skel-<name>"
-#   skel_add_tests(<name> ...)       -> target skel_<name>_tests, registered in CTest
+#   cengine_add_library(<name> ...)     -> target cengine_<name>, alias cengine::<name>
+#   cengine_add_executable(<name> ...)  -> target cengine_<name>, binary "cengine-<name>"
+#   cengine_add_tests(<name> ...)       -> target cengine_<name>_tests, registered in CTest
 #
 # See docs/guides/adding-a-module.md for the full walkthrough.
 # =============================================================================
 
-# Internal: settings shared by every compiled skel target.
-function(_skel_apply_common target)
-  target_link_libraries(${target} PRIVATE $<BUILD_INTERFACE:skel_project_options>)
+# Internal: settings shared by every compiled cengine target.
+function(_cengine_apply_common target)
+  target_link_libraries(${target} PRIVATE $<BUILD_INTERFACE:cengine_project_options>)
   set_target_properties(${target} PROPERTIES CXX_EXTENSIONS OFF)
-  if(SKEL_ENABLE_CLANG_TIDY)
-    set_target_properties(${target} PROPERTIES CXX_CLANG_TIDY "${SKEL_CLANG_TIDY_COMMAND}")
+  if(CENGINE_ENABLE_CLANG_TIDY)
+    set_target_properties(${target} PROPERTIES CXX_CLANG_TIDY "${CENGINE_CLANG_TIDY_COMMAND}")
   endif()
 endfunction()
 
 # -----------------------------------------------------------------------------
-# skel_add_library(<name>
+# cengine_add_library(<name>
 #     [HEADER_ONLY]
 #     HEADERS      <public headers, relative to the module dir or absolute>...
 #     [SOURCES     <private sources>...]
-#     [PUBLIC_DEPS <targets>...]    # part of the public API (skel::x, fmt::fmt, ...)
+#     [PUBLIC_DEPS <targets>...]    # part of the public API (cengine::x, fmt::fmt, ...)
 #     [PRIVATE_DEPS <targets>...]   # implementation details
 #     [PACKAGES    <find_package names>...])  # third-party packages providing the deps
 #
 # Layout expected in the calling directory:
-#     include/skel/<name>/*.hpp   public headers  (#include <skel/<name>/foo.hpp>)
+#     include/cengine/<name>/*.hpp   public headers  (#include <cengine/<name>/foo.hpp>)
 #     src/*.cpp                   private sources
 #     tests/                      unit tests (added by the module's CMakeLists)
 #
-# Generates <skel/<name>/export.hpp> with SKEL_<NAME>_EXPORT for shared builds.
+# Generates <cengine/<name>/export.hpp> with CENGINE_<NAME>_EXPORT for shared builds.
 # -----------------------------------------------------------------------------
-function(skel_add_library name)
+function(cengine_add_library name)
   cmake_parse_arguments(PARSE_ARGV 1 arg "HEADER_ONLY" ""
                         "HEADERS;SOURCES;PUBLIC_DEPS;PRIVATE_DEPS;PACKAGES")
   if(arg_UNPARSED_ARGUMENTS)
-    message(FATAL_ERROR "skel_add_library(${name}): unknown arguments ${arg_UNPARSED_ARGUMENTS}")
+    message(FATAL_ERROR "cengine_add_library(${name}): unknown arguments ${arg_UNPARSED_ARGUMENTS}")
   endif()
   if(NOT arg_HEADERS)
-    message(FATAL_ERROR "skel_add_library(${name}): HEADERS is required")
+    message(FATAL_ERROR "cengine_add_library(${name}): HEADERS is required")
   endif()
 
   set(target ${PROJECT_NAME}_${name})
@@ -57,7 +57,7 @@ function(skel_add_library name)
 
   if(arg_HEADER_ONLY)
     if(arg_SOURCES OR arg_PRIVATE_DEPS)
-      message(FATAL_ERROR "skel_add_library(${name}): HEADER_ONLY libraries take no SOURCES/PRIVATE_DEPS")
+      message(FATAL_ERROR "cengine_add_library(${name}): HEADER_ONLY libraries take no SOURCES/PRIVATE_DEPS")
     endif()
     add_library(${target} INTERFACE)
     set(scope INTERFACE)
@@ -65,7 +65,7 @@ function(skel_add_library name)
     add_library(${target})  # STATIC or SHARED depending on BUILD_SHARED_LIBS
     set(scope PUBLIC)
     target_sources(${target} PRIVATE ${arg_SOURCES})
-    _skel_apply_common(${target})
+    _cengine_apply_common(${target})
 
     generate_export_header(${target}
       BASE_NAME ${upper}
@@ -95,17 +95,17 @@ function(skel_add_library name)
     BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include" "${gen_include_dir}"
     FILES ${arg_HEADERS})
 
-  # Bookkeeping consumed by SkelInstall / SkelDocs
-  set_property(GLOBAL APPEND PROPERTY SKEL_MODULES ${name})
-  set_property(GLOBAL APPEND PROPERTY SKEL_MODULE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
-  set_property(GLOBAL APPEND PROPERTY SKEL_DOC_INPUTS
+  # Bookkeeping consumed by CengineInstall / CengineDocs
+  set_property(GLOBAL APPEND PROPERTY CENGINE_MODULES ${name})
+  set_property(GLOBAL APPEND PROPERTY CENGINE_MODULE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
+  set_property(GLOBAL APPEND PROPERTY CENGINE_DOC_INPUTS
                "${CMAKE_CURRENT_SOURCE_DIR}/include" "${gen_include_dir}")
-  set_property(GLOBAL APPEND PROPERTY SKEL_EXPORT_MACROS "${upper}_EXPORT=" "${upper}_NO_EXPORT=")
+  set_property(GLOBAL APPEND PROPERTY CENGINE_EXPORT_MACROS "${upper}_EXPORT=" "${upper}_NO_EXPORT=")
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
-    set_property(GLOBAL APPEND PROPERTY SKEL_DOC_INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+    set_property(GLOBAL APPEND PROPERTY CENGINE_DOC_INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
   endif()
 
-  if(NOT SKEL_INSTALL)
+  if(NOT CENGINE_INSTALL)
     return()
   endif()
 
@@ -119,13 +119,13 @@ function(skel_add_library name)
 
   install(EXPORT ${target}-targets
     NAMESPACE ${PROJECT_NAME}::
-    DESTINATION "${SKEL_INSTALL_CMAKEDIR}"
+    DESTINATION "${CENGINE_INSTALL_CMAKEDIR}"
     COMPONENT ${target}_dev)
 
   # Per-module loader: pulls its internal + third-party dependencies, then its
-  # targets. Lets consumers do find_package(skel COMPONENTS <name>).
+  # targets. Lets consumers do find_package(cengine COMPONENTS <name>).
   set(module_file "${CMAKE_CURRENT_BINARY_DIR}/${target}-module.cmake")
-  set(content "# Generated by skel_add_library(${name}) - do not edit\n")
+  set(content "# Generated by cengine_add_library(${name}) - do not edit\n")
   string(APPEND content "include_guard(GLOBAL)\ninclude(CMakeFindDependencyMacro)\n")
   foreach(dep IN LISTS arg_PUBLIC_DEPS arg_PRIVATE_DEPS)
     if(dep MATCHES "^${PROJECT_NAME}::(.+)$")
@@ -140,22 +140,22 @@ function(skel_add_library name)
   file(WRITE "${module_file}" "${content}")
 
   install(FILES "${module_file}"
-    DESTINATION "${SKEL_INSTALL_CMAKEDIR}"
+    DESTINATION "${CENGINE_INSTALL_CMAKEDIR}"
     COMPONENT ${target}_dev)
 endfunction()
 
 # -----------------------------------------------------------------------------
-# skel_add_executable(<name>
+# cengine_add_executable(<name>
 #     SOURCES <sources>...
 #     [DEPS <targets>...]
 #     [PACKAGES <find_package names>...]
 #     [NO_INSTALL])
-# Produces target skel_<name> and binary "skel-<name>".
+# Produces target cengine_<name> and binary "cengine-<name>".
 # -----------------------------------------------------------------------------
-function(skel_add_executable name)
+function(cengine_add_executable name)
   cmake_parse_arguments(PARSE_ARGV 1 arg "NO_INSTALL" "" "SOURCES;DEPS;PACKAGES")
   if(arg_UNPARSED_ARGUMENTS)
-    message(FATAL_ERROR "skel_add_executable(${name}): unknown arguments ${arg_UNPARSED_ARGUMENTS}")
+    message(FATAL_ERROR "cengine_add_executable(${name}): unknown arguments ${arg_UNPARSED_ARGUMENTS}")
   endif()
 
   set(target ${PROJECT_NAME}_${name})
@@ -168,24 +168,24 @@ function(skel_add_executable name)
   set_target_properties(${target} PROPERTIES OUTPUT_NAME ${PROJECT_NAME}-${name})
   target_compile_features(${target} PRIVATE cxx_std_23)
   target_link_libraries(${target} PRIVATE ${arg_DEPS})
-  _skel_apply_common(${target})
+  _cengine_apply_common(${target})
 
-  if(SKEL_INSTALL AND NOT arg_NO_INSTALL)
+  if(CENGINE_INSTALL AND NOT arg_NO_INSTALL)
     install(TARGETS ${target} RUNTIME COMPONENT ${target})
-    set_property(GLOBAL APPEND PROPERTY SKEL_APPS ${name})
+    set_property(GLOBAL APPEND PROPERTY CENGINE_APPS ${name})
   endif()
 endfunction()
 
 # -----------------------------------------------------------------------------
-# skel_add_tests(<module>
+# cengine_add_tests(<module>
 #     SOURCES <test sources>...
 #     [DEPS <extra targets>...])
-# Creates skel_<module>_tests linked to skel::<module> + Catch2, discovered by
+# Creates cengine_<module>_tests linked to cengine::<module> + Catch2, discovered by
 # CTest with the "<module>." prefix and label "<module>".
 # -----------------------------------------------------------------------------
-function(skel_add_tests name)
+function(cengine_add_tests name)
   cmake_parse_arguments(PARSE_ARGV 1 arg "" "" "SOURCES;DEPS")
-  if(NOT SKEL_BUILD_TESTS)
+  if(NOT CENGINE_BUILD_TESTS)
     return()
   endif()
 
@@ -196,7 +196,7 @@ function(skel_add_tests name)
     ${PROJECT_NAME}::${name}
     Catch2::Catch2WithMain
     ${arg_DEPS}
-    $<BUILD_INTERFACE:skel_project_options>)
+    $<BUILD_INTERFACE:cengine_project_options>)
   # Tests are deliberately not run through clang-tidy (Catch2 macros are noisy).
 
   catch_discover_tests(${target}

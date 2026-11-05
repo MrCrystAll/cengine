@@ -2,12 +2,12 @@
 
 # -----------------------------------------------------------------------------
 # Package test: install the build tree into a scratch prefix, then build and run
-# tests/package (an independent project using find_package(skel)). Proves that
+# tests/package (an independent project using find_package(cengine)). Proves that
 # the exported CMake package and the installed app actually work.
 # Run alone with:   ctest --preset <preset> -L package
 # Skip with:        ctest --preset <preset> -LE package
 # -----------------------------------------------------------------------------
-if(NOT SKEL_BUILD_PACKAGE_TEST OR NOT SKEL_INSTALL)
+if(NOT CENGINE_BUILD_PACKAGE_TEST OR NOT CENGINE_INSTALL)
   return()
 endif()
 
@@ -19,7 +19,7 @@ add_test(NAME package.install
     "-DBINARY_DIR=${PROJECT_BINARY_DIR}" "-DPREFIX=${_prefix}" "-DCLEAN=${_build}" "-DCONFIG=$<CONFIG>"
     -P "${PROJECT_SOURCE_DIR}/cmake/scripts/fresh-install.cmake")
 set_tests_properties(package.install PROPERTIES
-  FIXTURES_SETUP skel_installed
+  FIXTURES_SETUP cengine_installed
   LABELS package)
 
 set(_opts
@@ -46,14 +46,14 @@ add_test(NAME package.consumer
     --build-options ${_opts}
     --test-command "${CMAKE_CTEST_COMMAND}" --output-on-failure -C $<CONFIG>)
 set_tests_properties(package.consumer PROPERTIES
-  FIXTURES_REQUIRED skel_installed
+  FIXTURES_REQUIRED cengine_installed
   LABELS package)
 
-if(SKEL_BUILD_APPS)
+if(CENGINE_BUILD_APPS)
   add_test(NAME package.cli
-    COMMAND "${_prefix}/${CMAKE_INSTALL_BINDIR}/skel-cli${CMAKE_EXECUTABLE_SUFFIX}")
+    COMMAND "${_prefix}/${CMAKE_INSTALL_BINDIR}/cengine-cli${CMAKE_EXECUTABLE_SUFFIX}")
   set_tests_properties(package.cli PROPERTIES
-    FIXTURES_REQUIRED skel_installed
-    PASS_REGULAR_EXPRESSION "skel-cli ${PROJECT_VERSION}"
+    FIXTURES_REQUIRED cengine_installed
+    PASS_REGULAR_EXPRESSION "cengine-cli ${PROJECT_VERSION}"
     LABELS package)
 endif()
